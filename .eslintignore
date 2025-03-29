@@ -1,0 +1,27 @@
+# Build outputs
+dist/
+build/
+web-build/
+
+# Dependencies
+node_modules/
+
+# Expo
+.expo/
+
+# Metro
+.metro-health-check*
+
+# Debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+*.pem
+
+# Environment files
+.env
+.env.*
+!.env.example 
