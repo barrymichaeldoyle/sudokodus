@@ -82,5 +82,19 @@ module.exports = {
       'declaration',
       { allowArrowFunctions: false },
     ],
+    // Tailwind CSS rules
+    'react/no-unknown-property': [
+      'error',
+      { ignore: ['className'] },
+    ],
+    'react/jsx-sort-props': [
+      'error',
+      {
+        callbacksLast: true,
+        shorthandFirst: true,
+        ignoreCase: true,
+        reservedFirst: true,
+      },
+    ],
   },
 };
