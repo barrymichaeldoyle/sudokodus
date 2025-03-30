@@ -17,7 +17,27 @@ export default function App() {
   useEffect(() => {
     const getTodos = async () => {
       try {
-        const { data: todos, error } = await supabase.from('todos').select();
+        // Check auth state
+        const {
+          data: { session },
+          error: sessionError,
+        } = await supabase.auth.getSession();
+        console.log('Auth Session:', session);
+
+        if (sessionError) {
+          console.error('Session Error:', sessionError);
+        }
+
+        const { data: todos, error } = await supabase
+          .from('todos')
+          .select('id, title, created_at, completed');
+
+        console.log('Supabase Response:', {
+          todos,
+          error,
+          count: todos?.length,
+          isAuthenticated: !!session,
+        });
 
         if (error) {
           console.error('Error fetching todos:', error.message);
