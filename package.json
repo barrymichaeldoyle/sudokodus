@@ -16,10 +16,7 @@
     "db:stop": "supabase stop",
     "db:reset": "supabase db reset",
     "db:new": "supabase migration new",
-    "db:push": "supabase db push",
-    "db:seed": "./supabase/seed.sh",
-    "import:puzzles": "node scripts/importPuzzles.js",
-    "seed:daily": "node scripts/seedDailyChallenges.js"
+    "db:push": "supabase db push"
   },
   "dependencies": {
     "@expo/metro-runtime": "~4.0.1",
