@@ -24,7 +24,7 @@ function TabIcon({
           focused ? ios.focusedName || ios.name : ios.name
         }
         size={size}
-        colors={[color]}
+        tintColor={color}
       />
     );
   }

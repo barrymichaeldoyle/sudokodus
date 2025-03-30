@@ -37,7 +37,11 @@ export default function TabLayout() {
           }),
         }}
       />
-      <Tabs.Screen
+      {/* COMING SOON!
+            Remember to move daily.tsx back to (tabs)
+            from `src/wip` when we're ready to use it again.
+      */}
+      {/* <Tabs.Screen
         name="daily"
         options={{
           title: 'Daily Challenges',
@@ -46,7 +50,7 @@ export default function TabLayout() {
             web: { name: 'calendar' },
           }),
         }}
-      />
+      /> */}
     </Tabs>
   );
 }
