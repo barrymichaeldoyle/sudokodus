@@ -2,7 +2,7 @@
   "name": "sudokodus",
   "license": "MIT",
   "version": "1.0.0",
-  "main": "index.ts",
+  "main": "node_modules/expo/AppEntry.js",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
@@ -12,9 +12,14 @@
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "lint": "eslint . --ext .ts,.tsx",
     "lint:fix": "eslint . --ext .ts,.tsx --fix",
-    "db:push": "supabase db push",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
     "db:reset": "supabase db reset",
-    "db:seed": "./supabase/seed.sh"
+    "db:new": "supabase migration new",
+    "db:push": "supabase db push",
+    "db:seed": "./supabase/seed.sh",
+    "import:puzzles": "node scripts/importPuzzles.js",
+    "seed:daily": "node scripts/seedDailyChallenges.js"
   },
   "dependencies": {
     "@expo/metro-runtime": "~4.0.1",
