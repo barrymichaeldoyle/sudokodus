@@ -18,42 +18,35 @@ function TabIcon({
   web,
 }: TabIconProps) {
   if (Platform.OS === 'ios') {
+    const name = focused
+      ? ios.focusedName || ios.name
+      : ios.name;
     return (
       <SymbolView
-        name={
-          focused ? ios.focusedName || ios.name : ios.name
-        }
+        name={name}
         size={size}
         tintColor={color}
       />
     );
   }
 
-  return (
-    <Ionicons
-      name={
-        focused
-          ? web.name
-          : (`${web.name}-outline` as keyof typeof Ionicons.glyphMap)
-      }
-      size={size}
-      color={color}
-    />
-  );
+  const name = focused
+    ? web.name
+    : `${web.name}-outline` in Ionicons.glyphMap
+      ? (`${web.name}-outline` as keyof typeof Ionicons.glyphMap)
+      : web.name;
+  return <Ionicons name={name} size={size} color={color} />;
 }
 
+interface TabBarIconProps {
+  focused: boolean;
+  size: number;
+  color: string;
+}
 export function renderTabIcon(
-  icons: Omit<TabIconProps, 'focused' | 'size' | 'color'>
+  icons: Omit<TabIconProps, keyof TabBarIconProps>
 ) {
-  return ({
-    focused,
-    size,
-    color,
-  }: {
-    focused: boolean;
-    size: number;
-    color: string;
-  }) => (
+  return ({ focused, size, color }: TabBarIconProps) => (
     <TabIcon
       focused={focused}
       size={size}

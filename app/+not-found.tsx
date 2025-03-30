@@ -6,9 +6,12 @@ export default function NotFoundScreen() {
   return (
     <>
       <Stack.Screen
-        options={{ title: 'Oops! Not Found' }}
+        options={{
+          title: 'Oops! Not Found',
+          headerBackTitle: '',
+        }}
       />
-      <View className="flex-1 justify-center items-center">
+      <View className="flex-1 items-center justify-center">
         <Link href="/" className="text-xl underline">
           Go back to Home screen!
         </Link>
