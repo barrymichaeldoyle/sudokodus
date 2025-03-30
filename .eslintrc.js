@@ -10,7 +10,12 @@ module.exports = {
     'plugin:import/typescript',
   ],
   parser: '@typescript-eslint/parser',
-  plugins: ['@typescript-eslint', 'react', 'react-hooks', 'import'],
+  plugins: [
+    '@typescript-eslint',
+    'react',
+    'react-hooks',
+    'import',
+  ],
   parserOptions: {
     ecmaFeatures: {
       jsx: true,
@@ -36,14 +41,25 @@ module.exports = {
   rules: {
     'react/react-in-jsx-scope': 'off', // Not needed in React 17+
     'react/prop-types': 'off', // We're using TypeScript
-    '@typescript-eslint/explicit-module-boundary-types': 'off',
-    '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+    '@typescript-eslint/explicit-module-boundary-types':
+      'off',
+    '@typescript-eslint/no-unused-vars': [
+      'warn',
+      { argsIgnorePattern: '^_' },
+    ],
     '@typescript-eslint/no-explicit-any': 'warn',
     'no-console': ['warn', { allow: ['warn', 'error'] }],
     'import/order': [
       'error',
       {
-        groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
+        groups: [
+          'builtin',
+          'external',
+          'internal',
+          'parent',
+          'sibling',
+          'index',
+        ],
         'newlines-between': 'always',
         alphabetize: {
           order: 'asc',
@@ -61,5 +77,10 @@ module.exports = {
     'import/first': 'error', // Ensure all imports are at the top of the file
     'import/newline-after-import': 'error', // Ensure there's a newline after import statements
     'import/no-duplicates': 'error', // Prevent duplicate imports
+    'func-style': [
+      'error',
+      'declaration',
+      { allowArrowFunctions: false },
+    ],
   },
 };
