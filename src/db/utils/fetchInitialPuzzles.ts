@@ -13,29 +13,46 @@ import { hasEnoughPuzzlesOfAllDifficulties } from './hasEnoughPuzzlesOfAllDiffic
  * // Fetches at least 5 puzzles for each difficulty level if needed
  */
 export async function fetchInitialPuzzles(
-  minCount: number = 10
+  minCount: number = 100
 ): Promise<void> {
   if (hasEnoughPuzzlesOfAllDifficulties(minCount)) {
     return;
   }
 
   for (const difficulty of difficulties) {
-    const { data, error } = await supabase
-      .from('puzzles')
-      .select('*')
-      .eq('difficulty', difficulty)
-      .limit(minCount);
+    try {
+      const { data, error } = await supabase
+        .from('puzzles')
+        .select('*')
+        .eq('difficulty', difficulty)
+        .limit(minCount);
 
-    if (error) {
-      throw new Error(
-        `Error fetching ${difficulty} puzzles: ${error.message}`
-      );
-    }
+      if (error) {
+        console.error(
+          `Supabase error details for ${difficulty}:`,
+          error
+        );
+        throw new Error(
+          `Error fetching ${difficulty} puzzles: ${error.message}`
+        );
+      }
 
-    if (data) {
+      if (!data || data.length === 0) {
+        console.warn(
+          `No puzzles found for difficulty: ${difficulty}`
+        );
+        continue;
+      }
+
       data.forEach(puzzle => {
         puzzles[puzzle.puzzle_string] = puzzle;
       });
+    } catch (e) {
+      console.error(
+        `Exception while fetching ${difficulty} puzzles:`,
+        e
+      );
+      throw e;
     }
   }
 }

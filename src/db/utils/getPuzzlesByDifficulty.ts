@@ -12,7 +12,9 @@ import { Difficulty, Puzzle } from '../types';
 export function getPuzzlesByDifficulty(
   difficulty: Difficulty
 ): Puzzle[] {
-  return Object.values(puzzles).filter(
+  const filteredPuzzles = Object.values(puzzles).filter(
     puzzle => puzzle.difficulty === difficulty
   );
+
+  return filteredPuzzles;
 }

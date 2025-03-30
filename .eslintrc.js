@@ -96,5 +96,7 @@ module.exports = {
         reservedFirst: true,
       },
     ],
+    // Disable UMD global warning for React
+    'react/jsx-uses-react': 'off',
   },
 };
