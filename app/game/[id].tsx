@@ -20,7 +20,7 @@ export default function GameScreen() {
       <Stack.Screen
         options={{
           title: 'SudokoduS',
-          headerBackTitle: '',
+          headerBackTitle: 'Back',
         }}
       />
       <View className="flex flex-1 items-center justify-center bg-[#25292e]">

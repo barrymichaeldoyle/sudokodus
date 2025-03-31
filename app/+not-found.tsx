@@ -8,7 +8,7 @@ export default function NotFoundScreen() {
       <Stack.Screen
         options={{
           title: 'Oops! Not Found',
-          headerBackTitle: '',
+          headerBackTitle: 'Back',
         }}
       />
       <View className="flex-1 items-center justify-center">
