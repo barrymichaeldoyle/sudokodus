@@ -1,14 +1,23 @@
 import { Tabs } from 'expo-router';
 import { Platform } from 'react-native';
+
+import { primary, white } from '../../src/colors';
 import { renderTabIcon } from '../../src/components/ui/TabIcon';
 
 export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarStyle: Platform.select({
-          web: { height: 60 },
-        }),
+        tabBarStyle: {
+          ...Platform.select({ web: { height: 60 } }),
+          backgroundColor: primary['500'],
+        },
+        tabBarActiveTintColor: white,
+        tabBarInactiveTintColor: `${white}d9`, // hex with 85% opacity
+        headerStyle: {
+          backgroundColor: primary['500'],
+        },
+        headerTintColor: white,
       }}
     >
       <Tabs.Screen
@@ -22,6 +31,7 @@ export default function TabLayout() {
             },
             web: { name: 'home' },
           }),
+          tabBarLabel: 'Home',
         }}
       />
       <Tabs.Screen
@@ -41,16 +51,32 @@ export default function TabLayout() {
             Remember to move daily.tsx back to (tabs)
             from `src/wip` when we're ready to use it again.
       */}
-      {/* <Tabs.Screen
+      <Tabs.Screen
         name="daily"
         options={{
           title: 'Daily Challenges',
           tabBarIcon: renderTabIcon({
-            ios: { name: 'calendar.badge.checkmark' },
-            web: { name: 'calendar' },
+            ios: {
+              name: 'flame',
+              focusedName: 'flame.fill',
+            },
+            web: { name: 'flame' },
           }),
         }}
-      /> */}
+      />
+      <Tabs.Screen
+        name="me"
+        options={{
+          title: 'Me',
+          tabBarIcon: renderTabIcon({
+            ios: {
+              name: 'person',
+              focusedName: 'person.fill',
+            },
+            web: { name: 'person' },
+          }),
+        }}
+      />
     </Tabs>
   );
 }
