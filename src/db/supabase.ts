@@ -60,6 +60,9 @@ const dailyChallenges$ = observable(
     persist: {
       name: 'daily_challenges',
       retrySync: true,
+      plugin: observablePersistAsyncStorage({
+        AsyncStorage,
+      }),
     },
     retry: { infinite: true },
   })
@@ -74,6 +77,9 @@ const puzzles$ = observable(
     persist: {
       name: 'puzzles',
       retrySync: true,
+      plugin: observablePersistAsyncStorage({
+        AsyncStorage,
+      }),
     },
     retry: { infinite: true },
   })
@@ -85,9 +91,16 @@ export const gameStates$ = observable(
     supabase,
     collection: 'game_states',
     actions: ['read', 'create', 'update', 'delete'],
-    persist: { name: 'game_states', retrySync: true },
+    persist: {
+      name: 'game_states',
+      retrySync: true,
+      plugin: observablePersistAsyncStorage({
+        AsyncStorage,
+      }),
+    },
     realtime: true,
     retry: { infinite: true },
+    syncMode: 'auto',
   })
 ) as unknown as {
   assign: (value: GameState) => void;
