@@ -23,8 +23,8 @@ export default function GameScreen() {
           headerBackTitle: 'Back',
         }}
       />
-      <View className="flex flex-1 items-center justify-center bg-[#25292e]">
-        <Text className="text-white">
+      <View className="flex flex-1 items-center justify-center">
+        <Text>
           {gameState
             ? `Game ID: ${gameState.puzzle_string} - ${gameState.id}`
             : 'Loading game...'}
