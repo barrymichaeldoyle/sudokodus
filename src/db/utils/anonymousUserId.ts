@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Crypto from 'expo-crypto';
 
-const ANONYMOUS_USER_KEY = 'anonymous_user_id';
+const ANONYMOUS_USER_KEY = 'sudokodus_anonymous_user_id';
 
 export async function getAnonymousUserId(): Promise<string> {
   try {

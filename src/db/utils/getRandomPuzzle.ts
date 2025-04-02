@@ -1,55 +1,39 @@
-import { dailyChallenges } from '../supabase';
-import { Difficulty, Puzzle } from '../types';
-import { getPuzzlesByDifficulty } from './getPuzzlesByDifficulty';
+import {
+  diabolicalPuzzles$,
+  easyPuzzles$,
+  hardPuzzles$,
+  mediumPuzzles$,
+} from '../supabase';
+import { Difficulty } from '../types';
 
 /**
- * Retrieves a random puzzle of the specified difficulty level.
- * Does not return daily challenges unless no other puzzles are available.
- * @param {Difficulty} difficulty - The difficulty level of the puzzle to retrieve.
- * @returns {Puzzle} A random puzzle with its string and rating.
- * @throws {Error} If no puzzles are available for the specified difficulty.
- * @example
- * const randomPuzzle = getRandomPuzzle('easy');
- * // Returns: { puzzle_string: '...', rating: 1.2 }
+ * Gets a random puzzle of the specified difficulty that is not a daily challenge
+ * Works offline by using synced Legend State observables
+ * @param difficulty The difficulty level of the puzzle to get
+ * @returns A random puzzle that is not a daily challenge
  */
-export function getRandomPuzzle(
-  difficulty: Difficulty
-): Puzzle {
-  const puzzles = getPuzzlesByDifficulty(difficulty);
+export function getRandomPuzzle(difficulty: Difficulty) {
+  // Get the appropriate observable based on difficulty
+  const puzzles$ = {
+    easy: easyPuzzles$,
+    medium: mediumPuzzles$,
+    hard: hardPuzzles$,
+    diabolical: diabolicalPuzzles$,
+  }[difficulty];
 
-  // Handle case where dailyChallenges is undefined
-  const dailyPuzzleStrings = new Set<string>();
-  if (dailyChallenges) {
-    Object.values(dailyChallenges)
-      .filter(
-        challenge => challenge.difficulty === difficulty
-      )
-      .forEach(challenge => {
-        if (challenge.puzzle_string) {
-          dailyPuzzleStrings.add(challenge.puzzle_string);
-        }
-      });
-  }
+  // Get all puzzles from the observable
+  const puzzles = puzzles$.get();
+  const puzzleArray = Object.values(puzzles);
 
-  if (puzzles.length === 0) {
+  if (puzzleArray.length === 0) {
     throw new Error(
       `No puzzles available for difficulty: ${difficulty}`
     );
   }
 
-  const puzzlesThatAreNotDailyChallenges = puzzles.filter(
-    puzzle => !dailyPuzzleStrings.has(puzzle.puzzle_string)
+  // Get a random puzzle
+  const randomIndex = Math.floor(
+    Math.random() * puzzleArray.length
   );
-  if (puzzlesThatAreNotDailyChallenges.length > 0) {
-    return puzzlesThatAreNotDailyChallenges[
-      Math.floor(
-        Math.random() *
-          puzzlesThatAreNotDailyChallenges.length
-      )
-    ];
-  }
-
-  return puzzles[
-    Math.floor(Math.random() * puzzles.length)
-  ];
+  return puzzleArray[randomIndex];
 }

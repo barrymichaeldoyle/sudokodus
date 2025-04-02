@@ -1,58 +1,92 @@
-import { puzzles, supabase } from '../supabase';
-import { difficulties } from '../types';
-import { hasEnoughPuzzlesOfAllDifficulties } from './hasEnoughPuzzlesOfAllDifficulties';
+import {
+  diabolicalPuzzles$,
+  easyPuzzles$,
+  hardPuzzles$,
+  mediumPuzzles$,
+} from '../supabase';
+import { Difficulty, Puzzle } from '../types';
+
+const INITIAL_PUZZLES_PER_DIFFICULTY = 10;
 
 /**
- * Fetches an initial set of puzzles for each difficulty level if not enough are loaded.
- * This ensures that new users have enough puzzles to start playing immediately.
- * @param {number} minCount - The minimum number of puzzles to fetch per difficulty (default: 10).
- * @returns {Promise<void>} A promise that resolves when the initial puzzles are fetched.
- * @throws {Error} If there's an error fetching puzzles from the database.
- * @example
- * await fetchInitialPuzzles(5);
- * // Fetches at least 5 puzzles for each difficulty level if needed
+ * Fetches initial puzzles for offline support
+ * Gets up to 10 puzzles per difficulty level
  */
-export async function fetchInitialPuzzles(
-  minCount: number = 100
-): Promise<void> {
-  if (hasEnoughPuzzlesOfAllDifficulties(minCount)) {
-    return;
-  }
+export async function fetchInitialPuzzles() {
+  const difficulties: Difficulty[] = [
+    'easy',
+    'medium',
+    'hard',
+    'diabolical',
+  ];
 
+  // Get current puzzles to check what we already have
+  const currentCounts = {
+    easy: (Object.values(easyPuzzles$.get()) as Puzzle[])
+      .length,
+    medium: (
+      Object.values(mediumPuzzles$.get()) as Puzzle[]
+    ).length,
+    hard: (Object.values(hardPuzzles$.get()) as Puzzle[])
+      .length,
+    diabolical: (
+      Object.values(diabolicalPuzzles$.get()) as Puzzle[]
+    ).length,
+  };
+
+  // Only fetch if we don't have enough puzzles
   for (const difficulty of difficulties) {
+    if (
+      currentCounts[difficulty] >=
+      INITIAL_PUZZLES_PER_DIFFICULTY
+    ) {
+      console.log(
+        `Already have enough ${difficulty} puzzles (${currentCounts[difficulty]})`
+      );
+      continue;
+    }
+
     try {
-      const { data, error } = await supabase
-        .from('puzzles')
-        .select('*')
-        .eq('difficulty', difficulty)
-        .limit(minCount);
+      console.log(
+        `Fetching initial ${difficulty} puzzles...`
+      );
 
-      if (error) {
-        console.error(
-          `Supabase error details for ${difficulty}:`,
-          error
-        );
-        throw new Error(
-          `Error fetching ${difficulty} puzzles: ${error.message}`
-        );
-      }
+      // Get the appropriate observable based on difficulty
+      const puzzles$ = {
+        easy: easyPuzzles$,
+        medium: mediumPuzzles$,
+        hard: hardPuzzles$,
+        diabolical: diabolicalPuzzles$,
+      }[difficulty];
 
-      if (!data || data.length === 0) {
-        console.warn(
-          `No puzzles found for difficulty: ${difficulty}`
-        );
+      // Get current puzzles and add more if needed
+      const puzzles = puzzles$.get();
+      const newPuzzles = (
+        Object.values(puzzles) as Puzzle[]
+      ).slice(
+        0,
+        INITIAL_PUZZLES_PER_DIFFICULTY -
+          currentCounts[difficulty]
+      );
+
+      if (newPuzzles.length === 0) {
+        console.warn(`No ${difficulty} puzzles available`);
         continue;
       }
 
-      data.forEach(puzzle => {
-        puzzles[puzzle.puzzle_string] = puzzle;
-      });
-    } catch (e) {
-      console.error(
-        `Exception while fetching ${difficulty} puzzles:`,
-        e
+      console.log(
+        `Successfully fetched ${newPuzzles.length} ${difficulty} puzzles`
       );
-      throw e;
+
+      // Add each puzzle to the observable
+      newPuzzles.forEach(puzzle => {
+        puzzles$[puzzle.puzzle_string].set(puzzle);
+      });
+    } catch (error) {
+      console.error(
+        `Error processing ${difficulty} puzzles:`,
+        error
+      );
     }
   }
 }

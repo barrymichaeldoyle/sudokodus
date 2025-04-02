@@ -5,17 +5,17 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 BEGIN
-  -- Delete completed games older than 30 days
+  -- Delete completed games older than 90 days
   DELETE FROM public.game_states
   WHERE user_id NOT IN (SELECT id FROM auth.users)
     AND is_completed = true
-    AND updated_at < NOW() - INTERVAL '30 days';
+    AND updated_at < NOW() - INTERVAL '90 days';
 
-  -- Delete abandoned games older than 7 days
+  -- Delete abandoned games older than 30 days
   DELETE FROM public.game_states
   WHERE user_id NOT IN (SELECT id FROM auth.users)
     AND is_completed = false
-    AND updated_at < NOW() - INTERVAL '7 days';
+    AND updated_at < NOW() - INTERVAL '30 days';
 END;
 $$;
 

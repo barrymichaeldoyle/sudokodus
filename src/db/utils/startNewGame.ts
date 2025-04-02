@@ -1,21 +1,17 @@
 import { gameStates$, generateId } from '../supabase';
-import { getAnonymousUserId } from './anonymousUser';
+import { getAnonymousUserId } from './anonymousUserId';
 
 export async function startNewGame(puzzleString: string) {
   const id = generateId();
   const anonymousUserId = await getAnonymousUserId();
 
-  // Add keyed by id to the gameStates$ observable to trigger a create in Supabase
-  // @ts-ignore
-  gameStates$[id].set({
+  gameStates$[id].assign({
     id,
     user_id: anonymousUserId,
     puzzle_string: puzzleString,
     current_state: [],
     moves_history: [],
   });
-
-  console.log('SET GAME STATE!', id);
 
   return id;
 }

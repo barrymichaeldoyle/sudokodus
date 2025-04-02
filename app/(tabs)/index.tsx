@@ -5,26 +5,20 @@ import { Text, View } from 'react-native';
 
 import { primary } from '../../src/colors';
 import { Button } from '../../src/components/Button';
-import { Difficulty } from '../../src/db/types';
-import { getRandomPuzzle } from '../../src/db/utils/getRandomPuzzle';
-import { startNewGame } from '../../src/db/utils/startNewGame';
-import { useLoadPuzzles } from '../../src/hooks/useLoadPuzzles';
+import { createNewGame } from '../../src/db/actions/createNewGame';
 
 export default function HomeScreen() {
-  const { isLoading, error: errorLoadingPuzzles } =
-    useLoadPuzzles();
-
   const [error, setError] = useState<string | null>(null);
 
   async function handleStartNewGame() {
     setError(null);
 
     try {
-      // Start with an easy puzzle for now
-      const puzzle = getRandomPuzzle('easy' as Difficulty);
-      console.log('Got random puzzle:', puzzle);
-      startNewGame(puzzle.puzzle_string);
-      router.push(`/game/${puzzle.puzzle_string}`);
+      const gameState = await createNewGame('easy');
+      if (!gameState) {
+        throw new Error('Failed to create new game');
+      }
+      router.push(`/game/${gameState?.puzzle_string}`);
     } catch (error: any) {
       setError(
         `Failed to start new game: ${error?.message || 'Unknown error'}`
@@ -57,24 +51,17 @@ export default function HomeScreen() {
             label="Continue Game"
             variant="primary"
             onPress={handleStartNewGame}
-            disabled={isLoading}
           />
           <Button
             label="New Game"
             variant="secondary"
             onPress={handleStartNewGame}
-            disabled={isLoading}
           />
-          {/* {error && (
+          {error && (
             <Text className="mt-4 text-red-500">
               {error}
             </Text>
           )}
-          {errorLoadingPuzzles && (
-            <Text className="mt-4 text-red-500">
-              {errorLoadingPuzzles}
-            </Text>
-          )} */}
         </View>
       </View>
     </>

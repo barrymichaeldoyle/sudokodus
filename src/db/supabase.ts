@@ -52,11 +52,28 @@ configureSyncedSupabase({
 });
 
 // Sync daily challenges
-const dailyChallenges$ = observable(
+export const dailyChallenges$ = observable(
   syncedSupabase({
     supabase,
     collection: 'daily_challenges',
     actions: ['read'],
+    filter: select => {
+      const today = new Date();
+
+      const futureDate = new Date();
+      futureDate.setDate(today.getDate() + 7);
+
+      const todayFormatted = today
+        .toISOString()
+        .split('T')[0];
+      const futureDateFormatted = futureDate
+        .toISOString()
+        .split('T')[0];
+
+      return select
+        .gte('date', todayFormatted)
+        .lte('date', futureDateFormatted);
+    },
     persist: {
       name: 'daily_challenges',
       retrySync: true,
@@ -68,14 +85,25 @@ const dailyChallenges$ = observable(
   })
 );
 
-// Sync a subset of puzzles for random selection
-const puzzles$ = observable(
+export const PUZZLES_PER_DIFFICULTY = 10;
+
+// Observables for random puzzles by difficulty
+export const easyPuzzles$ = observable(
   syncedSupabase({
     supabase,
     collection: 'puzzles',
     actions: ['read'],
+    filter: select =>
+      select
+        .eq('difficulty', 'easy')
+        .not(
+          'puzzle_string',
+          'in',
+          `(SELECT puzzle_string FROM daily_challenges WHERE difficulty = 'easy')`
+        )
+        .limit(PUZZLES_PER_DIFFICULTY),
     persist: {
-      name: 'puzzles',
+      name: 'easy_puzzles',
       retrySync: true,
       plugin: observablePersistAsyncStorage({
         AsyncStorage,
@@ -85,8 +113,84 @@ const puzzles$ = observable(
   })
 );
 
-// Sync user's game states
-export const gameStates$ = observable(
+export const mediumPuzzles$ = observable(
+  syncedSupabase({
+    supabase,
+    collection: 'puzzles',
+    actions: ['read'],
+    filter: select =>
+      select
+        .eq('difficulty', 'medium')
+        .not(
+          'puzzle_string',
+          'in',
+          `(SELECT puzzle_string FROM daily_challenges WHERE difficulty = 'medium')`
+        )
+        .limit(PUZZLES_PER_DIFFICULTY),
+    persist: {
+      name: 'medium_puzzles',
+      retrySync: true,
+      plugin: observablePersistAsyncStorage({
+        AsyncStorage,
+      }),
+    },
+    retry: { infinite: true },
+  })
+);
+
+export const hardPuzzles$ = observable(
+  syncedSupabase({
+    supabase,
+    collection: 'puzzles',
+    actions: ['read'],
+    filter: select =>
+      select
+        .eq('difficulty', 'hard')
+        .not(
+          'puzzle_string',
+          'in',
+          `(SELECT puzzle_string FROM daily_challenges WHERE difficulty = 'hard')`
+        )
+        .limit(PUZZLES_PER_DIFFICULTY),
+    persist: {
+      name: 'hard_puzzles',
+      retrySync: true,
+      plugin: observablePersistAsyncStorage({
+        AsyncStorage,
+      }),
+    },
+    retry: { infinite: true },
+  })
+);
+
+export const diabolicalPuzzles$ = observable(
+  syncedSupabase({
+    supabase,
+    collection: 'puzzles',
+    actions: ['read'],
+    filter: select =>
+      select
+        .eq('difficulty', 'diabolical')
+        .not(
+          'puzzle_string',
+          'in',
+          `(SELECT puzzle_string FROM daily_challenges WHERE difficulty = 'diabolical')`
+        )
+        .limit(PUZZLES_PER_DIFFICULTY),
+    persist: {
+      name: 'diabolical_puzzles',
+      retrySync: true,
+      plugin: observablePersistAsyncStorage({
+        AsyncStorage,
+      }),
+    },
+    retry: { infinite: true },
+  })
+);
+
+export const gameStates$ = observable<
+  Record<string, GameState>
+>(
   syncedSupabase({
     supabase,
     collection: 'game_states',
@@ -102,28 +206,25 @@ export const gameStates$ = observable(
     retry: { infinite: true },
     syncMode: 'auto',
   })
-) as unknown as {
-  assign: (value: GameState) => void;
-  set: (value: Record<string, GameState>) => void;
-  get: () => Record<string, GameState>;
-};
+);
 
-// get() activates and starts syncing
-export const dailyChallenges = dailyChallenges$.get();
-// Initialize puzzles as an empty object first
-export const puzzles: Record<
-  string,
-  Database['public']['Tables']['puzzles']['Row']
-> = {};
-// Then try to get the initial value
-try {
-  const initialPuzzles = puzzles$.get();
-  Object.assign(puzzles, initialPuzzles);
-  console.log('Initial puzzles loaded successfully');
-} catch (error) {
-  console.error('Error loading initial puzzles:', error);
-  // Keep the empty object as fallback
-}
-export const gameStates = gameStates$.get();
-
-console.log('Initial values loaded');
+export const activeGameStates$ = observable<
+  Record<string, GameState>
+>(
+  syncedSupabase({
+    supabase,
+    collection: 'game_states',
+    actions: ['read', 'create', 'update', 'delete'],
+    filter: select => select.eq('is_completed', false),
+    persist: {
+      name: 'active_game_states',
+      retrySync: true,
+      plugin: observablePersistAsyncStorage({
+        AsyncStorage,
+      }),
+    },
+    realtime: true,
+    retry: { infinite: true },
+    syncMode: 'auto',
+  })
+);

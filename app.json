@@ -8,6 +8,7 @@
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "scheme": "sudokodus",
+    "jsEngine": "hermes",
     "web": {
       "bundler": "metro",
       "favicon": "./assets/favicon.png"
@@ -19,7 +20,8 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "jsEngine": "jsc"
     },
     "android": {
       "adaptiveIcon": {
