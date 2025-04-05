@@ -2,6 +2,7 @@
 import { router, useNavigation } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useState } from 'react';
+import { Alert } from 'react-native';
 import {
   getUnusedPuzzle,
   markPuzzleAsUsed,
@@ -37,9 +38,17 @@ export function StartGameButton({
         checkAndReplenishIfNeeded(difficulty);
       } else {
         // Handle case where no puzzles are available locally
-        // Maybe trigger an immediate fetch if online?
-        alert(
-          `No ${difficulty} puzzles available locally. Try connecting to the internet.`
+        Alert.alert(
+          'No Puzzles Available',
+          `No new ${difficulty} puzzles available locally. Try connecting to the internet, or check your active games.`,
+          [
+            { text: 'Cancel', style: 'cancel' },
+            {
+              text: 'View Active Games',
+              onPress: () => router.push('/games'),
+              style: 'default',
+            },
+          ]
         );
       }
     } catch (error) {

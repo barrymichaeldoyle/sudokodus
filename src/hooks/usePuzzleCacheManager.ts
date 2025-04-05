@@ -7,6 +7,7 @@ import {
   useSQLiteContext,
   type SQLiteDatabase,
 } from 'expo-sqlite';
+import { useCallback } from 'react';
 import {
   addPuzzlesToCache,
   CachedPuzzle,
@@ -53,10 +54,19 @@ async function fetchAndStorePuzzles(
       ) // Exclude existing
       .limit(count); // Fetch the required number
 
-    if (error) throw error;
+    if (error) {
+      console.error(
+        `Error fetching ${difficulty} puzzles:`,
+        error
+      );
+      setCacheStatus(difficulty, 'error');
+      throw error;
+    }
     if (!data || data.length === 0) {
-      console.log(`No new puzzles found for ${difficulty}`);
-      setCacheStatus(difficulty, 'idle');
+      console.log(
+        `No new puzzles found for ${difficulty} on server.`
+      );
+      setCacheStatus(difficulty, 'fetch_depleted');
       return 0; // No new puzzles fetched
     }
 
@@ -131,60 +141,88 @@ export function usePuzzleCacheManager() {
     },
   });
 
-  // --- Core Cache Checking Logic ---
-  async function checkAndReplenishCache(
-    difficulty: DifficultyLevel,
-    targetCount: number,
-    fetchSize: number
-  ) {
-    if (
-      networkStatus !== 'online' ||
-      fetchMutation.isPending
-    ) {
-      console.log(
-        `Skipping cache check for ${difficulty} (offline, already fetching, or unknown network)`
-      );
-      return; // Don't fetch if offline or already fetching
-    }
+  const checkAndReplenishCache = useCallback(
+    async (
+      difficulty: DifficultyLevel,
+      targetCount: number,
+      fetchSize: number
+    ) => {
+      const currentDifficultyStatus =
+        cacheStatus[difficulty];
 
-    setCacheStatus(difficulty, 'checking');
-    try {
-      const currentCount = await countUnusedPuzzles(
-        db,
-        difficulty
-      );
-      console.log(
-        `Local unused ${difficulty} puzzles: ${currentCount}`
-      );
-
-      if (currentCount < targetCount) {
-        const needed = Math.max(
-          fetchSize,
-          targetCount - currentCount
-        ); // Fetch at least fetchSize
+      if (
+        networkStatus !== 'online' ||
+        fetchMutation.isPending ||
+        currentDifficultyStatus === 'checking' ||
+        currentDifficultyStatus === 'fetching' ||
+        currentDifficultyStatus === 'fetch_depleted'
+      ) {
         console.log(
-          `Need ${needed} more ${difficulty} puzzles. Triggering fetch.`
+          `Skipping cache check for ${difficulty}. Status: ${currentDifficultyStatus}, Network: ${networkStatus}, Pending: ${fetchMutation.isPending}`
         );
-        // Use the mutation to fetch and store
-        fetchMutation.mutate({ difficulty, count: needed });
-        // Status is set to 'fetching' inside the mutation function
-      } else {
-        console.log(
-          `Cache for ${difficulty} is sufficient (${currentCount}/${targetCount}).`
-        );
-        setCacheStatus(difficulty, 'idle');
+        return; // Don't proceed if offline, already working, or depleted
       }
-    } catch (error) {
-      console.error(
-        `Error checking cache for ${difficulty}:`,
-        error
-      );
-      setCacheStatus(difficulty, 'error');
-    }
-  }
 
+      setCacheStatus(difficulty, 'checking');
+      try {
+        const currentCount = await countUnusedPuzzles(
+          db,
+          difficulty
+        );
+        console.log(
+          `Local unused ${difficulty} puzzles: ${currentCount}`
+        );
+
+        if (currentCount < targetCount) {
+          const needed = Math.max(
+            fetchSize,
+            targetCount - currentCount
+          );
+          console.log(
+            `Need ${needed} more ${difficulty} puzzles. Triggering fetch.`
+          );
+
+          // Final check before mutating (optional but safe)
+          if (
+            useAppStore.getState().networkStatus ===
+            'online'
+          ) {
+            fetchMutation.mutate({
+              difficulty,
+              count: needed,
+            });
+            // Status will be set to 'fetching' inside the mutation function
+          } else {
+            console.log(
+              `Skipping fetch mutation for ${difficulty} (offline check right before mutate)`
+            );
+            setCacheStatus(difficulty, 'idle'); // Reset status if we skip mutation
+          }
+        } else {
+          console.log(
+            `Cache for ${difficulty} is sufficient (${currentCount}/${targetCount}).`
+          );
+          setCacheStatus(difficulty, 'idle');
+        }
+      } catch (error) {
+        console.error(
+          `Error checking cache for ${difficulty}:`,
+          error
+        );
+        setCacheStatus(difficulty, 'error');
+      }
+    },
+    [
+      db,
+      networkStatus,
+      fetchMutation.isPending,
+      fetchMutation.mutate,
+      setCacheStatus,
+      cacheStatus,
+    ]
+  );
   // --- Public Functions ---
-  function ensureInitialCache() {
+  const ensureInitialCache = useCallback(() => {
     console.log('Ensuring initial puzzle cache...');
     DIFFICULTY_LEVELS.forEach(diff => {
       checkAndReplenishCache(
@@ -193,20 +231,21 @@ export function usePuzzleCacheManager() {
         FETCH_BATCH_SIZE
       );
     });
-  }
+  }, [checkAndReplenishCache]);
 
-  function checkAndReplenishIfNeeded(
-    difficulty: DifficultyLevel
-  ) {
-    console.log(
-      `Checking replenishment for ${difficulty}...`
-    );
-    checkAndReplenishCache(
-      difficulty,
-      REPLENISH_THRESHOLD,
-      FETCH_BATCH_SIZE
-    );
-  }
+  const checkAndReplenishIfNeeded = useCallback(
+    (difficulty: DifficultyLevel) => {
+      console.log(
+        `Checking replenishment for ${difficulty}...`
+      );
+      checkAndReplenishCache(
+        difficulty,
+        REPLENISH_THRESHOLD,
+        FETCH_BATCH_SIZE
+      );
+    },
+    [checkAndReplenishCache]
+  );
 
   return {
     ensureInitialCache,

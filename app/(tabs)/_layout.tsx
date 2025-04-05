@@ -14,9 +14,7 @@ export default function TabLayout() {
         },
         tabBarActiveTintColor: white,
         tabBarInactiveTintColor: `${white}d9`, // hex with 85% opacity
-        headerStyle: {
-          backgroundColor: primary['500'],
-        },
+        headerStyle: { backgroundColor: primary['500'] },
         headerTintColor: white,
       }}
     >

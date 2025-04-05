@@ -7,7 +7,7 @@ import { Stack } from 'expo-router';
 import { SQLiteProvider } from 'expo-sqlite';
 import { StatusBar } from 'expo-status-bar';
 import { PostHogProvider } from 'posthog-react-native';
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 
 import '../global.css';
@@ -16,6 +16,8 @@ import {
   initializeDatabaseTables,
   SQLITE_DB_NAME,
 } from '../src/db/sqlite';
+import { usePuzzleCacheManager } from '../src/hooks/usePuzzleCacheManager';
+import { useAppStore } from '../src/stores/appStore';
 
 const queryClient = new QueryClient();
 
@@ -44,17 +46,42 @@ export default function RootLayout() {
           useSuspense
         >
           <QueryClientProvider client={queryClient}>
-            <Stack>
-              <Stack.Screen
-                name="(tabs)"
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen name="+not-found" />
-            </Stack>
-            <StatusBar style="light" />
+            <AppContent />
           </QueryClientProvider>
         </SQLiteProvider>
+        <StatusBar style="light" />
       </Suspense>
     </PostHogProvider>
+  );
+}
+
+function AppContent() {
+  const subscribeToNetworkChanges = useAppStore(
+    state => state.subscribeToNetworkChanges
+  );
+  const networkStatus = useAppStore(
+    state => state.networkStatus
+  );
+  const { ensureInitialCache } = usePuzzleCacheManager();
+
+  useEffect(() => {
+    const unsubscribe = subscribeToNetworkChanges();
+    return () => unsubscribe();
+  }, [subscribeToNetworkChanges]);
+
+  useEffect(() => {
+    if (networkStatus === 'online') {
+      ensureInitialCache();
+    }
+  }, [networkStatus, ensureInitialCache]);
+
+  return (
+    <Stack>
+      <Stack.Screen
+        name="(tabs)"
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen name="+not-found" />
+    </Stack>
   );
 }

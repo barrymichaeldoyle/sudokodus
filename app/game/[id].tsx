@@ -1,6 +1,7 @@
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { Text, View } from 'react-native';
 
+import { primary, white } from '../../src/colors';
 import { usePostHogCapture } from '../../src/hooks/usePostHogCapture';
 
 export default function GameScreen() {
@@ -17,6 +18,8 @@ export default function GameScreen() {
         options={{
           title: 'SudokoduS',
           headerBackTitle: 'Back',
+          headerStyle: { backgroundColor: primary['500'] },
+          headerTintColor: white,
         }}
       />
       <View className="flex flex-1 items-center justify-center">

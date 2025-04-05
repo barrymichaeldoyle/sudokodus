@@ -10,7 +10,8 @@ type CacheStatus =
   | 'idle'
   | 'checking'
   | 'fetching'
-  | 'error';
+  | 'error'
+  | 'fetch_depleted';
 
 interface AppState {
   networkStatus: NetworkStatus;
@@ -43,20 +44,43 @@ export const useAppStore = create<AppState>()(set => ({
   subscribeToNetworkChanges: () => {
     const unsubscribe = NetInfo.addEventListener(
       (state: NetInfoState) => {
-        const status: NetworkStatus = state.isConnected
-          ? 'online'
-          : 'offline';
-        console.log('Network status changed:', status);
-        set({ networkStatus: status });
+        const newStatus: NetworkStatus =
+          (state.isConnected ?? false)
+            ? 'online'
+            : 'offline';
+        const previousStatus =
+          useAppStore.getState().networkStatus; // Get previous status
+
+        set(state => {
+          // --- Reset 'fetch_depleted' status when coming back online ---
+          let newCacheStatus = state.puzzleCacheStatus;
+          if (
+            newStatus === 'online' &&
+            previousStatus !== 'online'
+          ) {
+            console.log(
+              "Network back online, resetting 'fetch_depleted' statuses to 'idle'."
+            );
+            newCacheStatus = { ...state.puzzleCacheStatus }; // Create a new object
+            for (const diff in newCacheStatus) {
+              if (
+                newCacheStatus[diff as DifficultyLevel] ===
+                'fetch_depleted'
+              ) {
+                newCacheStatus[diff as DifficultyLevel] =
+                  'idle';
+              }
+            }
+          }
+          // --- End Reset Logic ---
+          return {
+            networkStatus: newStatus,
+            puzzleCacheStatus: newCacheStatus,
+          };
+        });
       }
     );
-    // Get initial state
-    NetInfo.fetch().then((state: NetInfoState) => {
-      const status: NetworkStatus = state.isConnected
-        ? 'online'
-        : 'offline';
-      set({ networkStatus: status });
-    });
+    // ... rest of fetch initial state ...
     return unsubscribe;
   },
 }));
