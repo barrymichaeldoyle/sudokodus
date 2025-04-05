@@ -20,9 +20,10 @@
   },
   "dependencies": {
     "@expo/metro-runtime": "~4.0.1",
-    "@legendapp/state": "3.0.0-beta.30",
     "@react-native-async-storage/async-storage": "^1.23.1",
+    "@react-native-community/netinfo": "11.4.1",
     "@supabase/supabase-js": "^2.49.3",
+    "@tanstack/react-query": "^5.71.10",
     "expo": "~52.0.42",
     "expo-application": "~6.0.2",
     "expo-constants": "~17.0.8",
@@ -30,9 +31,9 @@
     "expo-device": "~7.0.3",
     "expo-linking": "~7.0.5",
     "expo-localization": "~16.0.1",
-    "expo-network": "~7.0.5",
     "expo-router": "~4.0.20",
     "expo-splash-screen": "^0.29.22",
+    "expo-sqlite": "~15.1.4",
     "expo-status-bar": "~2.0.1",
     "expo-symbols": "~0.2.2",
     "nativewind": "^4.1.23",
@@ -47,7 +48,8 @@
     "react-native-url-polyfill": "^2.0.0",
     "react-native-web": "~0.19.13",
     "tailwind-merge": "^3.1.0",
-    "tailwindcss": "^3.4.17"
+    "tailwindcss": "^3.4.17",
+    "zustand": "^5.0.3"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

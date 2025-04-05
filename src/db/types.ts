@@ -1,3 +1,6 @@
+/**
+ * Better DX types based off of the supabase schema.
+ */
 import { Database } from './database.types';
 
 export type Puzzle =
@@ -9,11 +12,14 @@ export type Difficulty =
 export type GameState =
   Database['public']['Tables']['game_states']['Row'];
 
+export type DifficultyLevel =
+  Database['public']['Enums']['difficulty_level'];
+
 /**
  * The list of all difficulty levels.
- * @type {Difficulty[]}
+ * @type {DifficultyLevel[]}
  */
-export const difficulties: Difficulty[] = [
+export const DIFFICULTY_LEVELS: DifficultyLevel[] = [
   'easy',
   'medium',
   'hard',

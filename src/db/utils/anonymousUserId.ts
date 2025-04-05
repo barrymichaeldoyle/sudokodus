@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Crypto from 'expo-crypto';
+import { generateId } from './generateId';
 
 const ANONYMOUS_USER_KEY = 'sudokodus_anonymous_user_id';
 
@@ -13,7 +14,7 @@ export async function getAnonymousUserId(): Promise<string> {
     }
 
     // Generate a new UUID if none exists
-    const newId = Crypto.randomUUID();
+    const newId = generateId();
     await AsyncStorage.setItem(ANONYMOUS_USER_KEY, newId);
     return newId;
   } catch (error) {
