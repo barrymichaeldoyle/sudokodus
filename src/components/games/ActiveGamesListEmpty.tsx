@@ -1,7 +1,7 @@
 import { Text, View } from 'react-native';
 
-import { useStartNewGame } from '../hooks/useStartNewGame';
-import { Button } from './ui/Button';
+import { useStartNewGame } from '../../hooks/useStartNewGame';
+import { Button } from '../ui/Button';
 
 export function ActiveGamesListEmpty() {
   const { showGameDifficultyOptions, isLoading } =

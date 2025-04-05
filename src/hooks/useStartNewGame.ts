@@ -12,6 +12,7 @@ import {
 } from '../db/sqlite';
 import { Difficulty } from '../db/types';
 import { generateId } from '../db/utils/generateId';
+import { ACTIVE_GAMES_QUERY_KEY } from './useActiveGames';
 import { usePuzzleCacheManager } from './usePuzzleCacheManager';
 
 const ACTIVE_GAMES_PATH = '/games';
@@ -120,7 +121,7 @@ export function useStartNewGame(): {
 
           // Invalidate queries to refresh the games list
           queryClient.invalidateQueries({
-            queryKey: ['activeGames'],
+            queryKey: [ACTIVE_GAMES_QUERY_KEY],
           });
 
           router.push({
