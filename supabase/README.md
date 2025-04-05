@@ -29,18 +29,16 @@ fields and a Unix-style line-ending, for a total of 100 bytes per record:
       3 bytes of white-space (including the linefeed);
     100 bytes total
 
-## Supabase commands
+## Database Schema
 
-Whenever making updates to the `Supabase` migrations, you need to run `supabase db push`. Make you have the `supabase` cli tool installed to do this. You will need to run `supabase login` and `supabase link` to get your environment connected to the right supabase project.
+The database schema is organized in `supabase/schema/`:
 
-For seeding the DB, we use a node script in `scripts` called `importPuzzles.js`. This easier than trying to use SQL commands since it does involve some data processing to convert the .txt file contents to valid data for our puzzles table.
+- Individual component files are in subdirectories (tables, policies, etc.)
+- `current_schema.sql` contains the complete current schema
 
-## Environments
+### Making Schema Changes
 
-### Local Development
-
-For local development use `supabase start` which will set everything up for you in Docker. then run `supabase db reset` to apply migrations to your local DB
-
-### Production
-
-When you're ready to deploy changes, run `supabase db push --project-ref your-production-ref`
+1. Update the appropriate files in the schema directory
+2. Run `./scripts/update_schema.sh` to update the combined schema file
+3. Run `./scripts/create_migration.sh migration_name` to generate a migration
+4. Apply the migration with `supabase db push`

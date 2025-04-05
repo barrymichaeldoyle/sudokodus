@@ -1,0 +1,1 @@
+CREATE TYPE difficulty_level AS ENUM ('easy', 'medium', 'hard', 'diabolical');
