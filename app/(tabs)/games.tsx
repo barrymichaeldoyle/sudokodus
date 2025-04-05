@@ -5,8 +5,11 @@ import { FlatList, Text, View } from 'react-native';
 import { activeGameStates$ as _activeGameStates$ } from '../../src/db/supabase';
 
 import { GameState } from '../../src/db/types';
+import { usePostHogCapture } from '../../src/hooks/usePostHogCapture';
 
 export default function ActiveGamesScreen() {
+  usePostHogCapture('active_games_screen_opened');
+
   return (
     <ActiveGames $activeGameStates={_activeGameStates$} />
   );

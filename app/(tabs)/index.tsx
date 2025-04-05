@@ -6,8 +6,10 @@ import { Text, View } from 'react-native';
 import { primary } from '../../src/colors';
 import { Button } from '../../src/components/Button';
 import { createNewGame } from '../../src/db/actions/createNewGame';
+import { usePostHogCapture } from '../../src/hooks/usePostHogCapture';
 
 export default function HomeScreen() {
+  usePostHogCapture('home_screen_opened');
   const [error, setError] = useState<string | null>(null);
 
   async function handleStartNewGame() {

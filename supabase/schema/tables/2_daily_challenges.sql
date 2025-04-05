@@ -1,4 +1,3 @@
--- Daily challenges table --
 CREATE TABLE IF NOT EXISTS public.daily_challenges (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   date DATE NOT NULL,

@@ -1,4 +1,3 @@
--- Puzzles table --
 CREATE TABLE IF NOT EXISTS public.puzzles (
   puzzle_string CHAR(81) PRIMARY KEY,
   rating REAL NOT NULL,

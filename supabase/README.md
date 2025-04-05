@@ -1,8 +1,40 @@
 # Supabase Docs
 
-This file is here to document the order of `migrations` that need to occur in Supabase as well as `scripts` that are required for running those migrations from the command line and seeding the DB.
+This file documents the Supabase database structure, migrations, and related scripts for the Sudoku app.
 
-## Puzzles
+## Database Schema
+
+The database schema is organized in `supabase/schema/`:
+
+- Individual component files are in subdirectories (tables, policies, etc.)
+- `current_schema.sql` contains the complete current schema
+
+### Making Schema Changes
+
+1. Update the appropriate files in the schema directory
+2. Run `./scripts/update_schema.sh` to update the combined schema file
+3. Run `./scripts/create_migration.sh migration_name` to generate a migration
+4. Apply the migration with `supabase db push`
+
+## Scripts
+
+- `./scripts/update_schema.sh` - Combines individual schema files into a complete schema
+- `./scripts/create_migration.sh <name>` - Generates a migration file from schema changes
+
+## Initial Setup
+
+For a new environment, follow these steps:
+
+1. Link to your Supabase project: `supabase link --project-ref <project-id>`
+2. Run the initial migration: `supabase db push`
+3. Seed the database with puzzles: `./scripts/seed_puzzles.sh` (if applicable)
+
+## Known Issues
+
+- The pg_cron extension must be enabled for the cleanup functions to work properly
+- If you encounter extension-related errors during migration, make sure extensions are properly installed
+
+## Puzzles Data
 
 The puzzles in the `scripts/data` folder come from the public domain repo [sudoku-exchange-puzzle-bank](https://github.com/grantm/sudoku-exchange-puzzle-bank/blob/master/README.md).
 
@@ -20,6 +52,8 @@ sorted into four 'buckets':
 | Hard       | < 5.0  |
 | Diabolical | ≥ 5.0  |
 
+### Puzzle Format
+
 Each text file has one puzzle per line, represented as three space-separated
 fields and a Unix-style line-ending, for a total of 100 bytes per record:
 
@@ -28,17 +62,3 @@ fields and a Unix-style line-ending, for a total of 100 bytes per record:
       4 bytes of rating (nn.n)
       3 bytes of white-space (including the linefeed);
     100 bytes total
-
-## Database Schema
-
-The database schema is organized in `supabase/schema/`:
-
-- Individual component files are in subdirectories (tables, policies, etc.)
-- `current_schema.sql` contains the complete current schema
-
-### Making Schema Changes
-
-1. Update the appropriate files in the schema directory
-2. Run `./scripts/update_schema.sh` to update the combined schema file
-3. Run `./scripts/create_migration.sh migration_name` to generate a migration
-4. Apply the migration with `supabase db push`
