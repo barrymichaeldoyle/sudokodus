@@ -1,11 +1,15 @@
 import * as SQLite from 'expo-sqlite';
 
-const db = SQLite.openDatabaseSync('sudoku.db');
+export const SQLITE_DB_NAME = 'sudoku.db';
 
-export function initPuzzleCacheTable(): void {
+// --- Table Initialization (runs via Provider onInit) ---
+export async function initializeDatabaseTables(
+  db: SQLite.SQLiteDatabase
+): Promise<void> {
   try {
-    // Synchronous execution
-    db.execSync(`
+    await db.execAsync(`
+      PRAGMA journal_mode = WAL; -- Enable Write-Ahead Logging for better performance
+
       CREATE TABLE IF NOT EXISTS puzzle_cache (
         puzzle_string CHAR(81) PRIMARY KEY,
         rating REAL NOT NULL,
@@ -16,15 +20,21 @@ export function initPuzzleCacheTable(): void {
         fetched_at INTEGER NOT NULL,
         is_used BOOLEAN DEFAULT false
       );
+
       CREATE INDEX IF NOT EXISTS idx_puzzle_cache_difficulty_used ON puzzle_cache(difficulty, is_used);
+
+      -- Initialize other tables here...
+      -- CREATE TABLE IF NOT EXISTS game_states (...);
     `);
-    console.log('Puzzle cache table initialized (sync).');
+    console.log(
+      'Database tables initialized successfully (async).'
+    );
   } catch (error) {
     console.error(
-      'Error initializing puzzle cache table (sync):',
+      'Error initializing database tables:',
       error
     );
-    throw error; // Re-throw if needed
+    throw error; // Re-throw
   }
 }
 
@@ -41,67 +51,48 @@ export type CachedPuzzle = {
   is_used: boolean;
 };
 
-export function addPuzzlesToCacheSync(
+export async function addPuzzlesToCache(
+  db: SQLite.SQLiteDatabase,
   puzzles: CachedPuzzle[]
-): void {
-  if (puzzles.length === 0) {
-    return;
-  }
-
-  let insertStatement: SQLite.SQLiteStatement | null = null; // Keep track for finalization
-
+): Promise<void> {
+  if (puzzles.length === 0) return;
   try {
-    // Prepare the statement once outside the loop
-    insertStatement = db.prepareSync(
+    // Use prepared statements
+    const insertStatement = await db.prepareAsync(
       `INSERT OR IGNORE INTO puzzle_cache
        (puzzle_string, rating, difficulty, is_symmetric, clue_count, source, fetched_at, is_used)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?);`
     );
-
-    // Manually begin the transaction
-    db.execSync('BEGIN TRANSACTION;');
-
-    // Execute the prepared statement for each puzzle
-    for (const p of puzzles) {
-      insertStatement.executeSync(
-        p.puzzle_string,
-        p.rating,
-        p.difficulty,
-        p.is_symmetric ? 1 : 0,
-        p.clue_count,
-        p.source,
-        Date.now(), // fetched_at
-        p.is_used ? 1 : 0
-      );
-    }
-
-    // Manually commit the transaction
-    db.execSync('COMMIT;');
-
-    console.log(`Added ${puzzles.length} puzzles (sync).`);
+    // Execute in a transaction
+    await db.withTransactionAsync(async () => {
+      for (const p of puzzles) {
+        await insertStatement.executeAsync(
+          p.puzzle_string,
+          p.rating,
+          p.difficulty,
+          p.is_symmetric ? 1 : 0,
+          p.clue_count,
+          p.source,
+          Date.now(), // fetched_at
+          p.is_used ? 1 : 0
+        );
+      }
+    });
+    console.log(`Added ${puzzles.length} puzzles (async).`);
+    // Finalize statement if needed (depends on exact usage, often handled by transaction)
+    // await insertStatement.finalizeAsync();
   } catch (error) {
     console.error(
-      'Error adding puzzles to cache (sync):',
+      'Error adding puzzles to cache (async):',
       error
     );
-    // If an error occurs, try to roll back
-    try {
-      db.execSync('ROLLBACK;');
-      console.log('Transaction rolled back.');
-    } catch (rollbackError) {
-      console.error(
-        'Error rolling back transaction:',
-        rollbackError
-      );
-    }
-    throw error; // Re-throw the original error
-  } finally {
-    // Always finalize the prepared statement
-    insertStatement?.finalizeSync();
+    // await insertStatement?.finalizeAsync(); // Ensure finalization on error
+    throw error;
   }
 }
 
 export async function countUnusedPuzzles(
+  db: SQLite.SQLiteDatabase,
   difficulty: string
 ): Promise<number> {
   try {
@@ -122,6 +113,7 @@ export async function countUnusedPuzzles(
 }
 
 export async function getUnusedPuzzle(
+  db: SQLite.SQLiteDatabase,
   difficulty: string
 ): Promise<CachedPuzzle | null> {
   try {
@@ -145,24 +137,8 @@ export async function getUnusedPuzzle(
   }
 }
 
-export async function getCachedPuzzleStrings(): Promise<
-  string[]
-> {
-  try {
-    const results = await db.getAllAsync<{
-      puzzle_string: string;
-    }>('SELECT puzzle_string FROM puzzle_cache;');
-    return results.map(row => row.puzzle_string);
-  } catch (error) {
-    console.error(
-      'Error getting cached puzzle strings (async):',
-      error
-    );
-    throw error;
-  }
-}
-
 export async function markPuzzleAsUsed(
+  db: SQLite.SQLiteDatabase,
   puzzle_string: string
 ): Promise<void> {
   try {
@@ -179,8 +155,19 @@ export async function markPuzzleAsUsed(
   }
 }
 
-export function initializeDatabase() {
-  initPuzzleCacheTable();
-  // Initialize other tables like game_states etc.
-  console.log('Database initialized successfully');
+export async function getCachedPuzzleStrings(
+  db: SQLite.SQLiteDatabase
+): Promise<string[]> {
+  try {
+    const results = await db.getAllAsync<{
+      puzzle_string: string;
+    }>('SELECT puzzle_string FROM puzzle_cache;');
+    return results.map(row => row.puzzle_string);
+  } catch (error) {
+    console.error(
+      'Error getting cached puzzle strings (async):',
+      error
+    );
+    throw error;
+  }
 }

@@ -20,11 +20,7 @@ export default function GameScreen() {
         }}
       />
       <View className="flex flex-1 items-center justify-center">
-        <Text>
-          {/* {gameState
-            ? `Game ID: ${gameState.puzzle_string} - ${gameState.id}`
-            : 'Loading game...'} */}
-        </Text>
+        <Text>Puzzle String: {puzzleString}</Text>
       </View>
     </>
   );

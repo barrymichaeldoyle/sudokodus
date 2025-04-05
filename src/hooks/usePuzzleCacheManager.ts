@@ -4,7 +4,11 @@ import {
   useQueryClient,
 } from '@tanstack/react-query';
 import {
-  addPuzzlesToCacheSync,
+  useSQLiteContext,
+  type SQLiteDatabase,
+} from 'expo-sqlite';
+import {
+  addPuzzlesToCache,
   CachedPuzzle,
   countUnusedPuzzles,
   getCachedPuzzleStrings,
@@ -22,6 +26,7 @@ const FETCH_BATCH_SIZE = 50; // How many to fetch at once
 
 // --- React Query Mutation to Fetch and Store Puzzles ---
 async function fetchAndStorePuzzles(
+  db: SQLiteDatabase,
   difficulty: DifficultyLevel,
   count: number
 ): Promise<number> {
@@ -32,7 +37,7 @@ async function fetchAndStorePuzzles(
   try {
     // 1. Get IDs of puzzles already in cache to avoid fetching them again
     const existingPuzzleStrings =
-      await getCachedPuzzleStrings();
+      await getCachedPuzzleStrings(db);
 
     // 2. Fetch random puzzles from Supabase, excluding existing ones
     const { data, error } = await supabase
@@ -66,7 +71,7 @@ async function fetchAndStorePuzzles(
     }));
 
     // 4. Add to SQLite cache
-    addPuzzlesToCacheSync(puzzlesToCache);
+    await addPuzzlesToCache(db, puzzlesToCache);
     console.log(
       `Added ${puzzlesToCache.length} ${difficulty} puzzles to cache.`
     );
@@ -84,6 +89,7 @@ async function fetchAndStorePuzzles(
 }
 
 export function usePuzzleCacheManager() {
+  const db = useSQLiteContext();
   const queryClient = useQueryClient();
   const cacheStatus = useAppStore(
     state => state.puzzleCacheStatus
@@ -103,7 +109,7 @@ export function usePuzzleCacheManager() {
     }: {
       difficulty: DifficultyLevel;
       count: number;
-    }) => fetchAndStorePuzzles(difficulty, count),
+    }) => fetchAndStorePuzzles(db, difficulty, count),
     onSuccess: (fetchedCount, variables) => {
       // Invalidate the count query for this difficulty to refresh UI if needed
       queryClient.invalidateQueries({
@@ -143,8 +149,10 @@ export function usePuzzleCacheManager() {
 
     setCacheStatus(difficulty, 'checking');
     try {
-      const currentCount =
-        await countUnusedPuzzles(difficulty);
+      const currentCount = await countUnusedPuzzles(
+        db,
+        difficulty
+      );
       console.log(
         `Local unused ${difficulty} puzzles: ${currentCount}`
       );

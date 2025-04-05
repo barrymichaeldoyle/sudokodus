@@ -1,31 +1,11 @@
-import { router, Stack } from 'expo-router';
+import { Stack } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
-import { useState } from 'react';
 import { Text, View } from 'react-native';
 
 import { primary } from '../../src/colors';
-import { Button } from '../../src/components/Button';
-import { createNewGame } from '../../src/db/actions/createNewGame';
+import { StartGameButton } from '../../src/components/StartGameButton';
 
 export default function HomeScreen() {
-  const [error, setError] = useState<string | null>(null);
-
-  async function handleStartNewGame() {
-    setError(null);
-
-    try {
-      const gameState = await createNewGame('easy');
-      if (!gameState) {
-        throw new Error('Failed to create new game');
-      }
-      router.push(`/game/${gameState?.puzzle_string}`);
-    } catch (error: any) {
-      setError(
-        `Failed to start new game: ${error?.message || 'Unknown error'}`
-      );
-    }
-  }
-
   return (
     <>
       <Stack.Screen options={{ title: 'SudokoduS' }} />
@@ -47,21 +27,10 @@ export default function HomeScreen() {
           </View>
         </View>
         <View className="flex flex-col gap-4">
-          <Button
-            label="Continue Game"
-            variant="primary"
-            onPress={handleStartNewGame}
-          />
-          <Button
-            label="New Game"
-            variant="secondary"
-            onPress={handleStartNewGame}
-          />
-          {error && (
-            <Text className="mt-4 text-red-500">
-              {error}
-            </Text>
-          )}
+          <StartGameButton difficulty="easy" />
+          <StartGameButton difficulty="medium" />
+          <StartGameButton difficulty="hard" />
+          <StartGameButton difficulty="diabolical" />
         </View>
       </View>
     </>
