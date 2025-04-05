@@ -1,27 +1,21 @@
 import { router } from 'expo-router';
 import { FlatList, Text, View } from 'react-native';
 
+import { ActiveGamesListEmpty } from '../../src/components/ActiveGamesListEmpty';
 import { GameState } from '../../src/db/types';
 
 export default function ActiveGamesScreen() {
   return (
-    <View className="flex flex-1">
+    <View className="flex flex-1 p-4">
       <FlatList
         data={[]}
         // keyExtractor={item => item.id}
         renderItem={({ item }) => <GameItem game={item} />}
-        contentContainerClassName="p-4"
+        contentContainerClassName="flex-1"
         ItemSeparatorComponent={() => (
           <View className="h-4" />
         )}
-        ListEmptyComponent={() => (
-          <View className="flex flex-1 items-center justify-center p-4">
-            <Text className="text-center text-lg text-gray-600">
-              No active games. Start a new game from the
-              home screen!
-            </Text>
-          </View>
-        )}
+        ListEmptyComponent={ActiveGamesListEmpty}
       />
     </View>
   );

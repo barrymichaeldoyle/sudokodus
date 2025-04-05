@@ -1,4 +1,5 @@
 import {
+  ActivityIndicator,
   Pressable,
   PressableProps,
   Text,
@@ -41,7 +42,11 @@ export function Button({
           }[variant]
         )}
       >
-        {isLoading ? 'Loading...' : label}
+        {isLoading ? (
+          <ActivityIndicator size="small" color="white" />
+        ) : (
+          label
+        )}
       </Text>
     </Pressable>
   );

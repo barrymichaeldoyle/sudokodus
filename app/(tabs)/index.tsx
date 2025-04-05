@@ -1,58 +1,14 @@
-import {
-  ActionSheetProvider,
-  useActionSheet,
-} from '@expo/react-native-action-sheet';
 import { Stack } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { Text, View } from 'react-native';
 
 import { primary } from '../../src/colors';
 import { Button } from '../../src/components/ui/Button';
-import { Difficulty } from '../../src/db/types';
-import { useStartGame } from '../../src/hooks/useStartGame';
+import { useStartNewGame } from '../../src/hooks/useStartNewGame';
 
-const DIFFICULTY_OPTIONS: {
-  label: string;
-  difficulty: Difficulty;
-}[] = [
-  { label: 'Easy', difficulty: 'easy' },
-  { label: 'Medium', difficulty: 'medium' },
-  { label: 'Hard', difficulty: 'hard' },
-  { label: 'Diabolical', difficulty: 'diabolical' },
-] as const;
-
-function HomeScreen() {
-  const { startGame, isLoading } = useStartGame();
-  const { showActionSheetWithOptions } = useActionSheet();
-
-  async function showDifficultyOptions() {
-    const options = [
-      ...DIFFICULTY_OPTIONS.map(d => d.label),
-      'Cancel',
-    ];
-    const cancelButtonIndex = options.length - 1;
-
-    showActionSheetWithOptions(
-      {
-        options,
-        cancelButtonIndex,
-        title: 'Difficulty',
-        message: 'Select your level.',
-        // TODO: make this based on selected theme in future.
-        userInterfaceStyle: 'light',
-      },
-      selectedIndex => {
-        if (
-          selectedIndex !== undefined &&
-          selectedIndex !== cancelButtonIndex
-        ) {
-          startGame(
-            DIFFICULTY_OPTIONS[selectedIndex].difficulty
-          );
-        }
-      }
-    );
-  }
+export default function HomeScreen() {
+  const { showGameDifficultyOptions, isLoading } =
+    useStartNewGame();
 
   return (
     <>
@@ -77,19 +33,16 @@ function HomeScreen() {
         <View className="flex flex-col gap-4">
           <Button
             label="New Game"
-            onPress={showDifficultyOptions}
-            isLoading={isLoading}
+            onPress={showGameDifficultyOptions}
+            /**
+             * We don't want to show a loading state here,
+             * because it's such a quick flash that it's
+             * jarring.
+             */
+            disabled={isLoading}
           />
         </View>
       </View>
     </>
-  );
-}
-
-export default function HomeScreenWithProvider() {
-  return (
-    <ActionSheetProvider>
-      <HomeScreen />
-    </ActionSheetProvider>
   );
 }

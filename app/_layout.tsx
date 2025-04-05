@@ -10,6 +10,7 @@ import { PostHogProvider } from 'posthog-react-native';
 import { Suspense, useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 
+import { ActionSheetProvider } from '@expo/react-native-action-sheet';
 import '../global.css';
 import { config } from '../src/config';
 import {
@@ -46,7 +47,9 @@ export default function RootLayout() {
           useSuspense
         >
           <QueryClientProvider client={queryClient}>
-            <AppContent />
+            <ActionSheetProvider>
+              <AppContent />
+            </ActionSheetProvider>
           </QueryClientProvider>
         </SQLiteProvider>
         <StatusBar style="light" />
