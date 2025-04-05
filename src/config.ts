@@ -1,11 +1,12 @@
 const requiredEnvVars = [
   'EXPO_PUBLIC_SUPABASE_URL',
   'EXPO_PUBLIC_SUPABASE_ANON_KEY',
-  'POSTHOG_KEY',
-  'POSTHOG_HOST',
+  'EXPO_PUBLIC_POSTHOG_KEY',
+  'EXPO_PUBLIC_POSTHOG_HOST',
 ] as const;
 
 function validateEnvVars() {
+  console.log('process.env', process.env);
   const missingVars = requiredEnvVars.filter(
     envVar => !process.env[envVar]
   );
@@ -26,8 +27,8 @@ export const config = {
       .EXPO_PUBLIC_SUPABASE_ANON_KEY as string,
   },
   posthog: {
-    key: process.env.POSTHOG_KEY as string,
-    host: process.env.POSTHOG_HOST as string,
+    key: process.env.EXPO_PUBLIC_POSTHOG_KEY as string,
+    host: process.env.EXPO_PUBLIC_POSTHOG_HOST as string,
   },
 } as const;
 

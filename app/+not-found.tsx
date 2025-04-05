@@ -1,11 +1,7 @@
 import { Link, Stack } from 'expo-router';
 import { View } from 'react-native';
 
-import { usePostHogCapture } from '../src/hooks/usePostHogCapture';
-
 export default function NotFoundScreen() {
-  usePostHogCapture('not_found_screen_opened');
-
   return (
     <>
       <Stack.Screen
