@@ -1,5 +1,5 @@
 // Example in a component where user selects difficulty
-import { router, useNavigation } from 'expo-router';
+import { router } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useState } from 'react';
 import { Alert } from 'react-native';
@@ -19,7 +19,6 @@ export function StartGameButton({
   difficulty,
 }: StartGameButtonProps) {
   const db = useSQLiteContext();
-  const navigation = useNavigation();
   const { checkAndReplenishIfNeeded } =
     usePuzzleCacheManager();
   const [isLoading, setIsLoading] = useState(false);
