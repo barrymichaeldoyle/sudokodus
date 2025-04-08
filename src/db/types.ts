@@ -25,3 +25,20 @@ export const DIFFICULTY_LEVELS: DifficultyLevel[] = [
   'hard',
   'diabolical',
 ];
+
+/**
+ * A local game state that has been synced to the server.
+ * @type {LocalGameState}
+ */
+export type LocalGameState = GameState & {
+  /**
+   * Whether or not the game state has been synced to the server.
+   * @type {boolean}
+   *
+   * This is a local only field.
+   */
+  synced?: boolean;
+};
+
+export type DateString =
+  `${number}${number}${number}${number}-${number}${number}-${number}${number}`;

@@ -4,12 +4,8 @@ import { Text, View } from 'react-native';
 
 import { primary } from '../../src/colors';
 import { Button } from '../../src/components/ui/Button';
-import { useStartNewGame } from '../../src/hooks/useStartNewGame';
 
 export default function HomeScreen() {
-  const { showGameDifficultyOptions, isLoading } =
-    useStartNewGame();
-
   return (
     <>
       <Stack.Screen options={{ title: 'SudokoduS' }} />
@@ -31,16 +27,7 @@ export default function HomeScreen() {
           </View>
         </View>
         <View className="flex flex-col gap-4">
-          <Button
-            label="New Game"
-            onPress={showGameDifficultyOptions}
-            /**
-             * We don't want to show a loading state here,
-             * because it's such a quick flash that it's
-             * jarring.
-             */
-            disabled={isLoading}
-          />
+          <Button label="New Game" />
         </View>
       </View>
     </>

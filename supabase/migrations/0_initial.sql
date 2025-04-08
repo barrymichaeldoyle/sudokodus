@@ -43,16 +43,37 @@ CREATE TABLE IF NOT EXISTS public.game_states (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID, -- Removed REFERENCES constraint to allow anonymous users
   puzzle_string CHAR(81) REFERENCES public.puzzles(puzzle_string),
+  -- current_state JSONB structure:
+  -- {
+  --   grid: { value: number | null, isGiven: boolean }[][]
+  --   selectedCell: { row: number, col: number } | null
+  -- }
   current_state JSONB NOT NULL,
+  -- notes JSONB structure:
+  -- {
+  --   cells: {
+  --     "row,col": number[] // e.g. "0,0": [1,2,3] for top-left cell pencil marks
+  --   }
+  -- }
   notes JSONB,
   is_completed BOOLEAN DEFAULT false,
-  moves_count INTEGER DEFAULT 0,
   hints_used INTEGER DEFAULT 0,
-  moves_history JSONB[], -- Array of moves for undo/redo
-  current_move_index INTEGER DEFAULT 0, -- Track position in history
+  last_hint_at TIMESTAMP WITH TIME ZONE, -- NULL if no hint used yet, used for cooldown
+  -- moves_history JSONB[] structure:
+  -- Array of move objects, each containing:
+  -- {
+  --   type: 'setValue' | 'setNotes',
+  --   cell: { row: number, col: number },
+  --   value: number | null,           -- for setValue moves
+  --   notes?: number[],               -- for setNotes moves
+  --   previousValue?: number | null,  -- for setValue moves
+  --   previousNotes?: number[]        -- for setNotes moves
+  -- }
+  moves_history JSONB[],
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
+CREATE INDEX IF NOT EXISTS idx_game_states_user_id ON public.game_states(user_id);
 
 -- This will set the `created_at` column on create and `updated_at` column on every update
 CREATE OR REPLACE FUNCTION handle_times()

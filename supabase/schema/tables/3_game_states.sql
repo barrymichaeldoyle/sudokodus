@@ -29,16 +29,10 @@ CREATE TABLE IF NOT EXISTS public.game_states (
   --   previousNotes?: number[]        -- for setNotes moves
   -- }
   moves_history JSONB[],
-  -- current_move_index tracks the current position in moves_history
-  -- -1 means no moves made yet
-  -- Used for undo/redo functionality:
-  -- - undo decrements this index
-  -- - redo increments this index
-  -- - new move truncates history after this index and appends new move
-  current_move_index INTEGER DEFAULT 0,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
+CREATE INDEX IF NOT EXISTS idx_game_states_user_id ON public.game_states(user_id);
 
 -- This will set the `created_at` column on create and `updated_at` column on every update
 CREATE OR REPLACE FUNCTION handle_times()
