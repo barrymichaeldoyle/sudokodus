@@ -5,7 +5,7 @@
   "main": "expo-router/entry",
   "scripts": {
     "start": "expo start",
-    "android": "expo start --android",
+    "android": "expo run:android",
     "ios": "expo start --ios --localhost",
     "web": "expo start --web",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",

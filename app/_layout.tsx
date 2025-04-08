@@ -6,14 +6,11 @@ import {
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { PostHogProvider } from 'posthog-react-native';
-import { Suspense } from 'react';
 
 import { ActionSheetProvider } from '@expo/react-native-action-sheet';
 import '../global.css';
-import { LoadingScreen } from '../src/components/LoadingScreen';
 import { config } from '../src/config';
 import { DatabaseProvider } from '../src/db/DatabaseProvider';
-import { NetworkSyncManager } from '../src/NetworkSyncManager';
 
 const queryClient = new QueryClient();
 
@@ -26,24 +23,22 @@ export default function RootLayout() {
         customStorage: AsyncStorage,
       }}
     >
-      <Suspense fallback={<LoadingScreen />}>
-        <DatabaseProvider>
-          <QueryClientProvider client={queryClient}>
-            <ActionSheetProvider>
-              <NetworkSyncManager>
-                <Stack>
-                  <Stack.Screen
-                    name="(tabs)"
-                    options={{ headerShown: false }}
-                  />
-                  <Stack.Screen name="+not-found" />
-                </Stack>
-              </NetworkSyncManager>
-            </ActionSheetProvider>
-          </QueryClientProvider>
-        </DatabaseProvider>
-        <StatusBar style="light" />
-      </Suspense>
+      <DatabaseProvider>
+        <QueryClientProvider client={queryClient}>
+          <ActionSheetProvider>
+            {/* <NetworkSyncManager> */}
+            <Stack>
+              <Stack.Screen
+                name="(tabs)"
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen name="+not-found" />
+            </Stack>
+            {/* </NetworkSyncManager> */}
+          </ActionSheetProvider>
+        </QueryClientProvider>
+      </DatabaseProvider>
+      <StatusBar style="light" />
     </PostHogProvider>
   );
 }

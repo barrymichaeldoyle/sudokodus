@@ -2,29 +2,35 @@ import {
   SQLiteDatabase,
   SQLiteProvider,
 } from 'expo-sqlite';
-import { PropsWithChildren } from 'react';
+import { PropsWithChildren, useRef, useState } from 'react';
+import { LoadingScreen } from '../components/LoadingScreen';
 
-const SQLITE_DB_NAME = 'sudokodus.db';
+const SQLITE_DB_NAME = ':memory:';
 
 export function DatabaseProvider({
   children,
 }: PropsWithChildren) {
-  async function onInit(db: SQLiteDatabase) {
-    console.log('Starting database initialization...');
+  const [error, setError] = useState<string | null>(null);
+  const [isInitializing, setIsInitializing] =
+    useState(true);
+  const hasInitialized = useRef(false);
 
-    // Test if we can write to the database at all
-    try {
-      await db.execAsync(`PRAGMA journal_mode = WAL;`);
-      console.log('PRAGMA command executed successfully');
-    } catch (pragmaError) {
-      console.error('Failed to set PRAGMA:', pragmaError);
-      throw new Error(
-        `Database access error: ${pragmaError}`
-      );
+  async function onInit(db: SQLiteDatabase) {
+    if (hasInitialized.current) {
+      console.log('Database already initialized, skipping');
+      setIsInitializing(false);
+      return;
     }
 
-    // Create tables and indexes
-    await db.execAsync(`
+    try {
+      console.log('Starting database initialization...');
+
+      // Disable WAL mode
+      await db.execAsync(`PRAGMA journal_mode = DELETE;`);
+      console.log('Disabled WAL mode');
+
+      // Create tables and indexes
+      await db.execAsync(`
       CREATE TABLE IF NOT EXISTS puzzles (
         puzzle_string TEXT PRIMARY KEY,
         rating REAL NOT NULL,
@@ -77,35 +83,46 @@ export function DatabaseProvider({
       INSERT OR IGNORE INTO db_version (id, version) VALUES (1, 1);
     `);
 
-    console.log('Tables created successfully');
+      console.log('Tables created successfully');
 
-    // Run migrations if needed
-    const result = await db.getAllAsync<{
-      version: number;
-    }>(`SELECT version FROM db_version WHERE id = 1`);
-    const currentVersion = result[0]?.version || 0;
-    const targetVersion = 1; // Increment this when adding new migrations
+      // Run migrations if needed
+      const result = await db.getAllAsync<{
+        version: number;
+      }>(`SELECT version FROM db_version WHERE id = 1`);
+      const currentVersion = result[0]?.version || 0;
+      const targetVersion = 1; // Increment this when adding new migrations
 
-    if (currentVersion < targetVersion) {
-      console.log(
-        `Migrating database from version ${currentVersion} to ${targetVersion}`
-      );
-
-      // Run migrations sequentially
-      for (
-        let v = currentVersion + 1;
-        v <= targetVersion;
-        v++
-      ) {
-        // Add migration logic here
-        // Example: await db.execAsync(`ALTER TABLE game_states ADD COLUMN some_new_field TEXT`);
-
-        // Update version
-        await db.runAsync(
-          `UPDATE db_version SET version = ? WHERE id = 1`,
-          [v]
+      if (currentVersion < targetVersion) {
+        console.log(
+          `Migrating database from version ${currentVersion} to ${targetVersion}`
         );
+
+        // Run migrations sequentially
+        for (
+          let v = currentVersion + 1;
+          v <= targetVersion;
+          v++
+        ) {
+          // Add migration logic here
+          // Example: await db.execAsync(`ALTER TABLE game_states ADD COLUMN some_new_field TEXT`);
+
+          // Update version
+          await db.runAsync(
+            `UPDATE db_version SET version = ? WHERE id = 1`,
+            [v]
+          );
+        }
+
+        hasInitialized.current = true;
       }
+    } catch (error) {
+      console.error(
+        'Database initialization failed:',
+        error
+      );
+      setError(error as string);
+    } finally {
+      setIsInitializing(false);
     }
   }
 
@@ -113,9 +130,9 @@ export function DatabaseProvider({
     <SQLiteProvider
       databaseName={SQLITE_DB_NAME}
       onInit={onInit}
-      useSuspense
+      useSuspense={false}
     >
-      {children}
+      {isInitializing ? <LoadingScreen /> : children}
     </SQLiteProvider>
   );
 }
