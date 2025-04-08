@@ -3,6 +3,7 @@ import {
   SQLiteProvider,
 } from 'expo-sqlite';
 import { PropsWithChildren, useRef, useState } from 'react';
+import { ErrorScreen } from '../components/ErrorScreen';
 import { LoadingScreen } from '../components/LoadingScreen';
 
 const SQLITE_DB_NAME = ':memory:';
@@ -124,6 +125,10 @@ export function DatabaseProvider({
     } finally {
       setIsInitializing(false);
     }
+  }
+
+  if (error) {
+    return <ErrorScreen message={error} />;
   }
 
   return (
