@@ -11,6 +11,7 @@ import { ActionSheetProvider } from '@expo/react-native-action-sheet';
 import '../global.css';
 import { config } from '../src/config';
 import { DatabaseProvider } from '../src/db/DatabaseProvider';
+import { NetworkSyncManager } from '../src/NetworkSyncManager/NetworkSyncManager';
 
 const queryClient = new QueryClient();
 
@@ -26,15 +27,15 @@ export default function RootLayout() {
       <DatabaseProvider>
         <QueryClientProvider client={queryClient}>
           <ActionSheetProvider>
-            {/* <NetworkSyncManager> */}
-            <Stack>
-              <Stack.Screen
-                name="(tabs)"
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen name="+not-found" />
-            </Stack>
-            {/* </NetworkSyncManager> */}
+            <NetworkSyncManager>
+              <Stack>
+                <Stack.Screen
+                  name="(tabs)"
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen name="+not-found" />
+              </Stack>
+            </NetworkSyncManager>
           </ActionSheetProvider>
         </QueryClientProvider>
       </DatabaseProvider>

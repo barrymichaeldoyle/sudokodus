@@ -1,8 +1,5 @@
 import { useNetInfo } from '@react-native-community/netinfo';
-import {
-  useSupabaseClient,
-  useUser,
-} from '@supabase/auth-helpers-react';
+import { useUser } from '@supabase/auth-helpers-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useDrizzleStudio } from 'expo-drizzle-studio-plugin';
 import { useSQLiteContext } from 'expo-sqlite';
@@ -14,16 +11,18 @@ import {
   useEffect,
   useState,
 } from 'react';
-import { getGameStateQueryKey } from './hooks/useGameStates';
+import { supabase } from '../db/supabase';
+import { getGameStateQueryKey } from '../hooks/useGameStates';
 
 const SYNC_INTERVAL = 60_000; // 1 minute
+const MAX_RETRY_ATTEMPTS = 3;
+const RETRY_DELAY = 5000; // 5 seconds
 
 export function NetworkSyncManager({
   children,
 }: PropsWithChildren) {
   const db = useSQLiteContext();
   useDrizzleStudio(db);
-  const supabase = useSupabaseClient();
   const user = useUser();
   const netInfo = useNetInfo();
   const queryClient = useQueryClient();
@@ -34,130 +33,205 @@ export function NetworkSyncManager({
   const [syncError, setSyncError] = useState<Error | null>(
     null
   );
+  const [retryCount, setRetryCount] = useState(0);
+  const [isSupabaseAvailable, setIsSupabaseAvailable] =
+    useState(true);
+
+  // Function to check if Supabase client is properly initialized
+  const checkSupabaseClient = useCallback(async () => {
+    if (!supabase?.from) {
+      console.error(
+        'Supabase client not properly initialized'
+      );
+      setIsSupabaseAvailable(false);
+      return false;
+    }
+    return true;
+  }, [supabase]);
+
+  // Function to handle retry logic
+  const handleRetry = useCallback(
+    async (operation: () => Promise<void>) => {
+      if (retryCount >= MAX_RETRY_ATTEMPTS) {
+        console.error('Max retry attempts reached');
+        setSyncError(
+          new Error('Max retry attempts reached')
+        );
+        return;
+      }
+
+      try {
+        await operation();
+        setRetryCount(0); // Reset retry count on success
+      } catch (error) {
+        console.error('Operation failed:', error);
+        setRetryCount(prev => prev + 1);
+
+        if (retryCount < MAX_RETRY_ATTEMPTS - 1) {
+          setTimeout(() => {
+            handleRetry(operation);
+          }, RETRY_DELAY);
+        } else {
+          setSyncError(
+            error instanceof Error
+              ? error
+              : new Error('Operation failed')
+          );
+        }
+      }
+    },
+    [retryCount]
+  );
 
   const syncGameStatesToSupabase = useCallback(async () => {
+    // Skip sync if offline, no network, or Supabase not available
+    if (!netInfo.isConnected || !isSupabaseAvailable) {
+      return;
+    }
+
+    // Only sync to Supabase if user is logged in
     if (!user) {
       return;
     }
 
-    try {
-      const unsyncedGameStates = await db.getAllAsync<{
-        id: string;
-        user_id: string | null;
-        puzzle_string: string;
-        current_state: string;
-        notes: string | null;
-        is_completed: number;
-        moves_count: number;
-        hints_used: number;
-        moves_history: string;
-        created_at: string;
-        updated_at: string;
-      }>(
-        `SELECT * FROM game_states WHERE synced = 0 AND user_id = ?`,
-        [user.id]
-      );
+    await handleRetry(async () => {
+      const isSupabaseReady = await checkSupabaseClient();
+      if (!isSupabaseReady) return;
 
-      if (unsyncedGameStates.length === 0) {
-        return;
-      }
-
-      console.log(
-        `Syncing ${unsyncedGameStates.length} game states to Supabase`
-      );
-
-      // Process each unsynced game state
-      for (const gameState of unsyncedGameStates) {
-        // Check if the record already exists in Supabase
-        const { data: existingData, error: checkError } =
-          await supabase
-            .from('game_states')
-            .select('id')
-            .eq('id', gameState.id)
-            .maybeSingle();
-
-        if (checkError) {
-          console.error(
-            'Error checking game state existence:',
-            checkError
-          );
-          continue;
-        }
-
-        // Prepare the data for Supabase
-        const supabaseGameState = {
-          id: gameState.id,
-          user_id: user.id,
-          puzzle_string: gameState.puzzle_string,
-          current_state: JSON.parse(
-            gameState.current_state
-          ),
-          notes: gameState.notes
-            ? JSON.parse(gameState.notes)
-            : null,
-          is_completed: gameState.is_completed === 1,
-          moves_count: gameState.moves_count,
-          hints_used: gameState.hints_used,
-          moves_history: JSON.parse(
-            gameState.moves_history
-          ),
-          created_at: gameState.created_at,
-          updated_at: gameState.updated_at,
-        };
-
-        // Insert or update the record in Supabase
-        if (existingData) {
-          // Update existing record
-          const { error: updateError } = await supabase
-            .from('game_states')
-            .update(supabaseGameState)
-            .eq('id', gameState.id);
-
-          if (updateError) {
-            console.error(
-              'Error updating game state:',
-              updateError
-            );
-            continue;
-          }
-        } else {
-          // Insert new record
-          const { error: insertError } = await supabase
-            .from('game_states')
-            .insert(supabaseGameState);
-
-          if (insertError) {
-            console.error(
-              'Error inserting game state:',
-              insertError
-            );
-            continue;
-          }
-        }
-
-        // Mark the game state as synced in the local database
-        await db.runAsync(
-          `UPDATE game_states SET synced = 1 WHERE id = ?`,
-          [gameState.id]
+      try {
+        const unsyncedGameStates = await db.getAllAsync<{
+          id: string;
+          user_id: string | null;
+          puzzle_string: string;
+          current_state: string;
+          notes: string | null;
+          is_completed: number;
+          moves_count: number;
+          hints_used: number;
+          moves_history: string;
+          created_at: string;
+          updated_at: string;
+        }>(
+          `SELECT * FROM game_states WHERE synced = 0 AND user_id = ?`,
+          [user.id]
         );
-      }
 
-      // Invalidate queries to refresh data
-      queryClient.invalidateQueries({
-        queryKey: getGameStateQueryKey(user.id),
-      });
-    } catch (error) {
-      console.error(
-        'Error syncing game states to Supabase:',
-        error
-      );
-      throw error;
-    }
-  }, [db, supabase, user, queryClient]);
+        if (unsyncedGameStates.length === 0) {
+          return;
+        }
+
+        console.log(
+          `Syncing ${unsyncedGameStates.length} game states to Supabase`
+        );
+
+        // Process each unsynced game state
+        for (const gameState of unsyncedGameStates) {
+          // Check if the record already exists in Supabase
+          const { data: existingData, error: checkError } =
+            await supabase
+              .from('game_states')
+              .select('id')
+              .eq('id', gameState.id)
+              .maybeSingle();
+
+          if (checkError) {
+            console.error(
+              'Error checking game state existence:',
+              checkError
+            );
+            continue;
+          }
+
+          // Prepare the data for Supabase
+          const supabaseGameState = {
+            id: gameState.id,
+            user_id: user.id,
+            puzzle_string: gameState.puzzle_string,
+            current_state: JSON.parse(
+              gameState.current_state
+            ),
+            notes: gameState.notes
+              ? JSON.parse(gameState.notes)
+              : null,
+            is_completed: gameState.is_completed === 1,
+            moves_count: gameState.moves_count,
+            hints_used: gameState.hints_used,
+            moves_history: JSON.parse(
+              gameState.moves_history
+            ),
+            created_at: gameState.created_at,
+            updated_at: gameState.updated_at,
+          };
+
+          // Insert or update the record in Supabase
+          if (existingData) {
+            // Update existing record
+            const { error: updateError } = await supabase
+              .from('game_states')
+              .update(supabaseGameState)
+              .eq('id', gameState.id);
+
+            if (updateError) {
+              console.error(
+                'Error updating game state:',
+                updateError
+              );
+              continue;
+            }
+          } else {
+            // Insert new record
+            const { error: insertError } = await supabase
+              .from('game_states')
+              .insert(supabaseGameState);
+
+            if (insertError) {
+              console.error(
+                'Error inserting game state:',
+                insertError
+              );
+              continue;
+            }
+          }
+
+          // Mark the game state as synced in the local database
+          await db.runAsync(
+            `UPDATE game_states SET synced = 1 WHERE id = ?`,
+            [gameState.id]
+          );
+        }
+
+        // Invalidate queries to refresh data
+        queryClient.invalidateQueries({
+          queryKey: getGameStateQueryKey(user.id),
+        });
+      } catch (error) {
+        console.error(
+          'Error syncing game states to Supabase:',
+          error
+        );
+        throw error;
+      }
+    });
+  }, [
+    db,
+    supabase,
+    user,
+    netInfo.isConnected,
+    queryClient,
+    isSupabaseAvailable,
+    checkSupabaseClient,
+    handleRetry,
+  ]);
 
   // Function to sync game states from Supabase
   const syncGameStatesFromSupabase =
     useCallback(async () => {
+      // Skip sync if offline or no network
+      if (!netInfo.isConnected) {
+        return;
+      }
+
+      // Only sync from Supabase if user is logged in
       if (!user) {
         return;
       }
@@ -218,6 +292,7 @@ export function NetworkSyncManager({
             // If the local game state is newer, skip this update
             if (
               localGameState &&
+              remoteGameState.updated_at &&
               new Date(localGameState.updated_at) >=
                 new Date(remoteGameState.updated_at)
             ) {
@@ -241,7 +316,6 @@ export function NetworkSyncManager({
                   ? JSON.stringify(remoteGameState.notes)
                   : null,
                 remoteGameState.is_completed ? 1 : 0,
-                remoteGameState.moves_count,
                 remoteGameState.hints_used,
                 JSON.stringify(
                   remoteGameState.moves_history
@@ -261,7 +335,10 @@ export function NetworkSyncManager({
             );
 
             // If the puzzle doesn't exist locally, fetch it from Supabase
-            if (!puzzleExists) {
+            if (
+              !puzzleExists &&
+              remoteGameState.puzzle_string
+            ) {
               const {
                 data: puzzleData,
                 error: puzzleError,
@@ -331,11 +408,20 @@ export function NetworkSyncManager({
         );
         throw error;
       }
-    }, [db, supabase, user, queryClient]);
+    }, [
+      db,
+      supabase,
+      user,
+      netInfo.isConnected,
+      queryClient,
+    ]);
 
   // Function to sync puzzles from Supabase
   const syncPuzzlesFromSupabase = useCallback(async () => {
-    if (!user) return;
+    // Skip sync if offline or no network
+    if (!netInfo.isConnected) {
+      return;
+    }
 
     try {
       // Get the count of puzzles in the local database
@@ -361,8 +447,18 @@ export function NetworkSyncManager({
         throw error;
       }
 
-      if (!remotePuzzles || remotePuzzles.length === 0)
+      // If no puzzles are returned, we've depleted the database
+      if (!remotePuzzles || remotePuzzles.length === 0) {
+        console.log(
+          'No more puzzles available in Supabase database'
+        );
+        // Store this information to prevent future unnecessary sync attempts
+        await db.runAsync(
+          `INSERT OR REPLACE INTO app_settings (key, value) VALUES (?, ?)`,
+          ['puzzle_database_depleted', 'true']
+        );
         return;
+      }
 
       console.log(
         `Syncing ${remotePuzzles.length} puzzles from Supabase`
@@ -385,7 +481,7 @@ export function NetworkSyncManager({
               remotePuzzle.difficulty,
               remotePuzzle.is_symmetric ? 1 : 0,
               remotePuzzle.clue_count,
-              remotePuzzle.source || 'sudokudus',
+              remotePuzzle.source || 'sudokodus',
               remotePuzzle.created_at,
             ]
           );
@@ -410,12 +506,15 @@ export function NetworkSyncManager({
       );
       throw error;
     }
-  }, [db, supabase, user, queryClient]);
+  }, [db, supabase, netInfo.isConnected, queryClient]);
 
   // Function to sync daily challenges from Supabase
   const syncDailyChallengesFromSupabase =
     useCallback(async () => {
-      if (!user) return;
+      // Skip sync if offline or no network
+      if (!netInfo.isConnected) {
+        return;
+      }
 
       try {
         // Get today's date
@@ -487,7 +586,10 @@ export function NetworkSyncManager({
             );
 
             // If the puzzle doesn't exist locally, fetch it from Supabase
-            if (!puzzleExists) {
+            if (
+              !puzzleExists &&
+              remoteChallenge.puzzle_string
+            ) {
               const {
                 data: puzzleData,
                 error: puzzleError,
@@ -547,12 +649,17 @@ export function NetworkSyncManager({
         );
         throw error;
       }
-    }, [db, supabase, user, queryClient]);
+    }, [db, supabase, netInfo.isConnected, queryClient]);
 
   // Main sync function
   const syncData = useCallback(async () => {
-    // Skip if already syncing, offline, or no user
-    if (isSyncing || !netInfo.isConnected || !user) return;
+    // Skip if already syncing, offline, or Supabase not available
+    if (
+      isSyncing ||
+      !netInfo.isConnected ||
+      !isSupabaseAvailable
+    )
+      return;
 
     try {
       setIsSyncing(true);
@@ -566,11 +673,48 @@ export function NetworkSyncManager({
         )
       `);
 
-      // Perform sync operations
-      await syncGameStatesToSupabase();
-      await syncGameStatesFromSupabase();
-      await syncPuzzlesFromSupabase();
-      await syncDailyChallengesFromSupabase();
+      // Check if puzzle database is depleted
+      const depletedResult = await db.getAllAsync<{
+        value: string;
+      }>(
+        `SELECT value FROM app_settings WHERE key = 'puzzle_database_depleted'`
+      );
+
+      const isPuzzleDatabaseDepleted =
+        depletedResult[0]?.value === 'true';
+
+      // Check Supabase availability before attempting sync
+      const isSupabaseReady = await checkSupabaseClient();
+      if (!isSupabaseReady) {
+        console.error(
+          'Supabase is not available, skipping sync'
+        );
+        return;
+      }
+
+      // Always sync puzzles and daily challenges for all users
+      // Skip puzzle sync if database is depleted
+      if (!isPuzzleDatabaseDepleted) {
+        await handleRetry(async () => {
+          await syncPuzzlesFromSupabase();
+        });
+      } else {
+        console.log(
+          'Skipping puzzle sync - database is depleted'
+        );
+      }
+
+      await handleRetry(async () => {
+        await syncDailyChallengesFromSupabase();
+      });
+
+      // Only sync game states if user is logged in
+      if (user) {
+        await handleRetry(async () => {
+          await syncGameStatesToSupabase();
+          await syncGameStatesFromSupabase();
+        });
+      }
 
       // Update last sync time
       const now = new Date();
@@ -596,6 +740,9 @@ export function NetworkSyncManager({
     netInfo.isConnected,
     user,
     db,
+    isSupabaseAvailable,
+    checkSupabaseClient,
+    handleRetry,
     syncGameStatesToSupabase,
     syncGameStatesFromSupabase,
     syncPuzzlesFromSupabase,
@@ -604,21 +751,23 @@ export function NetworkSyncManager({
 
   // Sync on mount and when network status changes
   useEffect(() => {
-    if (netInfo.isConnected && user) {
+    if (netInfo.isConnected && isSupabaseAvailable) {
+      console.log('syncing data');
       syncData();
     }
-  }, [netInfo.isConnected, user, syncData]);
+  }, [netInfo.isConnected, isSupabaseAvailable, syncData]);
 
   // Set up periodic sync
   useEffect(() => {
     const intervalId = setInterval(() => {
-      if (netInfo.isConnected && user) {
+      if (netInfo.isConnected && isSupabaseAvailable) {
+        console.log('periodic syncing data');
         syncData();
       }
     }, SYNC_INTERVAL);
 
     return () => clearInterval(intervalId);
-  }, [netInfo.isConnected, user, syncData]);
+  }, [netInfo.isConnected, isSupabaseAvailable, syncData]);
 
   // Manual sync function that can be exposed to components
   const manualSync = useCallback(async () => {
@@ -631,6 +780,7 @@ export function NetworkSyncManager({
     lastSyncTime,
     syncError,
     isOnline: netInfo.isConnected,
+    isSupabaseAvailable,
     manualSync,
   };
 
@@ -647,6 +797,7 @@ interface SyncContextType {
   lastSyncTime: Date | null;
   syncError: Error | null;
   isOnline: boolean | null;
+  isSupabaseAvailable: boolean;
   manualSync: () => Promise<void>;
 }
 
@@ -655,6 +806,7 @@ const SyncContext = createContext<SyncContextType>({
   lastSyncTime: null,
   syncError: null,
   isOnline: null,
+  isSupabaseAvailable: true,
   manualSync: async () => {},
 });
 
