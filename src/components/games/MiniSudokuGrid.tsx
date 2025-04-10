@@ -1,7 +1,7 @@
 import { Text, View } from 'react-native';
 
 interface MiniSudokuGridProps {
-  puzzleString: string;
+  puzzleString: string | null;
 }
 
 export function MiniSudokuGrid({
@@ -35,7 +35,7 @@ export function MiniSudokuGrid({
                         const col = blockCol * 3 + cellCol;
                         const index = row * 9 + col;
                         const value = parseInt(
-                          puzzleString[index]
+                          puzzleString?.[index] || ''
                         );
 
                         const isLastInBlock = cellCol === 2;

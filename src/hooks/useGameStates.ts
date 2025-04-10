@@ -7,7 +7,10 @@ import {
   SQLiteDatabase,
   useSQLiteContext,
 } from 'expo-sqlite';
-import { LocalGameState } from '../db/types';
+import {
+  DifficultyLevel,
+  LocalGameState,
+} from '../db/types';
 import { generateId } from '../db/utils/generateId';
 
 export function getActiveGamesQueryKey(userId?: string) {
@@ -18,6 +21,39 @@ export function getCompletedGamesQueryKey(userId?: string) {
 }
 export function getGameStateQueryKey(id: string | null) {
   return ['gameState', id];
+}
+
+export interface GameStateWithDifficulty
+  extends LocalGameState {
+  difficulty: DifficultyLevel;
+}
+
+/**
+ * Base query for fetching games with common fields
+ */
+function getGamesQuery({
+  isCompleted,
+  userId,
+  limit = 100,
+}: {
+  isCompleted: boolean;
+  userId?: string;
+  limit?: number;
+}) {
+  const baseQuery = `
+    SELECT gs.*, p.difficulty 
+    FROM game_states gs
+    LEFT JOIN puzzles p ON gs.puzzle_string = p.puzzle_string
+    WHERE gs.is_completed = ? 
+    ${userId ? 'AND gs.user_id = ?' : ''}
+    ORDER BY gs.updated_at DESC LIMIT ?
+  `;
+
+  const params = userId
+    ? [isCompleted ? 1 : 0, userId, limit]
+    : [isCompleted ? 1 : 0, limit];
+
+  return { query: baseQuery, params };
 }
 
 /**
@@ -31,17 +67,18 @@ export function useActiveGames(
   limit = 100
 ) {
   const db = useSQLiteContext();
-
-  const query = userId
-    ? `SELECT * FROM game_states WHERE user_id = ? AND is_completed = 0 ORDER BY updated_at DESC LIMIT ?`
-    : `SELECT * FROM game_states WHERE is_completed = 0 ORDER BY updated_at DESC LIMIT ?`;
+  const { query, params } = getGamesQuery({
+    isCompleted: false,
+    userId,
+    limit,
+  });
 
   return useQuery({
     queryKey: getActiveGamesQueryKey(userId),
     queryFn: () =>
-      db.getAllAsync<LocalGameState>(
+      db.getAllAsync<GameStateWithDifficulty>(
         query,
-        userId ? [userId, limit] : [limit]
+        params
       ),
   });
 }
@@ -57,16 +94,18 @@ export function useCompletedGames(
   limit = 100
 ) {
   const db = useSQLiteContext();
+  const { query, params } = getGamesQuery({
+    isCompleted: true,
+    userId,
+    limit,
+  });
 
-  const query = userId
-    ? `SELECT * FROM game_states WHERE user_id = ? AND is_completed = 1 ORDER BY updated_at DESC LIMIT ?`
-    : `SELECT * FROM game_states WHERE is_completed = 1 ORDER BY updated_at DESC LIMIT ?`;
   return useQuery({
     queryKey: getCompletedGamesQueryKey(userId),
     queryFn: () =>
-      db.getAllAsync<LocalGameState>(
+      db.getAllAsync<GameStateWithDifficulty>(
         query,
-        userId ? [userId, limit] : [limit]
+        params
       ),
   });
 }
@@ -222,7 +261,7 @@ async function saveGameState(
       INSERT OR REPLACE INTO game_states (
         id, user_id, puzzle_string, current_state, notes, is_completed,
         hints_used, moves_history, created_at, updated_at, synced
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `,
     [
       gameState.id,

@@ -26,6 +26,16 @@ export const DIFFICULTY_LEVELS: DifficultyLevel[] = [
   'diabolical',
 ];
 
+export const DIFFICULTY_LABELS_MAP: Record<
+  DifficultyLevel,
+  string
+> = {
+  easy: 'Easy',
+  medium: 'Medium',
+  hard: 'Hard',
+  diabolical: 'Diabolical',
+} as const;
+
 /**
  * A local game state that has been synced to the server.
  * @type {LocalGameState}

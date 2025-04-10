@@ -116,14 +116,27 @@ export function NetworkSyncManager({
         )
       `);
 
-      const depletedResult = await db.getAllAsync<{
-        value: string;
-      }>(
-        `SELECT value FROM app_settings WHERE key = 'puzzle_database_depleted'`
-      );
+      // Check if we need to sync puzzles
+      const [depletedResult, lastSyncResult] =
+        await Promise.all([
+          db.getAllAsync<{ value: string }>(
+            `SELECT value FROM app_settings WHERE key = 'puzzle_database_depleted'`
+          ),
+          db.getAllAsync<{ value: string }>(
+            `SELECT value FROM app_settings WHERE key = 'last_puzzle_sync'`
+          ),
+        ]);
 
       const isPuzzleDatabaseDepleted =
         depletedResult[0]?.value === 'true';
+      const lastPuzzleSync = lastSyncResult[0]?.value
+        ? new Date(lastSyncResult[0].value)
+        : null;
+      const shouldSyncPuzzles =
+        !isPuzzleDatabaseDepleted &&
+        (!lastPuzzleSync ||
+          Date.now() - lastPuzzleSync.getTime() >
+            SYNC_INTERVAL);
 
       const isSupabaseReady = await checkSupabaseClient();
       if (!isSupabaseReady) {
@@ -133,16 +146,18 @@ export function NetworkSyncManager({
         return;
       }
 
-      if (!isPuzzleDatabaseDepleted) {
+      if (shouldSyncPuzzles) {
         await syncPuzzlesFromSupabase();
-      } else {
-        console.log(
-          'Skipping puzzle sync - database is depleted'
+        await db.runAsync(
+          `INSERT OR REPLACE INTO app_settings (key, value) VALUES (?, ?)`,
+          ['last_puzzle_sync', new Date().toISOString()]
         );
       }
 
+      // Always sync daily challenges
       await syncDailyChallengesFromSupabase();
 
+      // Only sync game states if user is logged in
       if (user) {
         await syncGameStatesToSupabase();
         await syncGameStatesFromSupabase();
@@ -180,7 +195,6 @@ export function NetworkSyncManager({
 
   useEffect(() => {
     if (netInfo.isConnected && isSupabaseAvailable) {
-      console.log('syncing data');
       syncData();
     }
   }, [netInfo.isConnected, isSupabaseAvailable, syncData]);
@@ -188,7 +202,6 @@ export function NetworkSyncManager({
   useEffect(() => {
     const intervalId = setInterval(() => {
       if (netInfo.isConnected && isSupabaseAvailable) {
-        console.log('periodic syncing data');
         syncData();
       }
     }, SYNC_INTERVAL);

@@ -1,6 +1,6 @@
 import { Text, View } from 'react-native';
 
-import { Button } from '../ui/Button';
+import { NewGameButton } from '../NewGameButton';
 
 export function ActiveGamesListEmpty() {
   return (
@@ -8,7 +8,7 @@ export function ActiveGamesListEmpty() {
       <Text className="text-center text-lg text-gray-600">
         No active games. Start a new game to begin playing!
       </Text>
-      <Button label="Start New Game" />
+      <NewGameButton />
     </View>
   );
 }

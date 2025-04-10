@@ -1,19 +1,13 @@
 import { router } from 'expo-router';
 import { Text, TouchableOpacity, View } from 'react-native';
 
-import { ActiveGameDisplayInfo } from '../../db/sqlite';
+import { DIFFICULTY_LABELS_MAP } from '../../db/types';
+import { GameStateWithDifficulty } from '../../hooks/useGameStates';
 import { MiniSudokuGrid } from './MiniSudokuGrid';
 
 interface GameItemProps {
-  game: ActiveGameDisplayInfo;
+  game: GameStateWithDifficulty;
 }
-
-const DIFFICULTY_LABELS = {
-  easy: 'Easy',
-  medium: 'Medium',
-  hard: 'Hard',
-  diabolical: 'Diabolical',
-} as const;
 
 const DIFFICULTY_COLORS = {
   easy: 'text-green-600',
@@ -36,7 +30,7 @@ export function GameItem({ game }: GameItemProps) {
         <View className="flex flex-1 flex-col pr-4">
           <View className="flex flex-row items-center gap-2">
             <Text className="text-lg font-medium text-gray-900">
-              {DIFFICULTY_LABELS[game.difficulty]}
+              {DIFFICULTY_LABELS_MAP[game.difficulty]}
             </Text>
             <Text className="text-sm text-gray-500">
               Game
