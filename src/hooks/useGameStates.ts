@@ -282,10 +282,6 @@ async function saveGameState(
   db: SQLiteDatabase,
   gameState: LocalGameState
 ) {
-  console.log(
-    'Saving game state:',
-    gameState.puzzle_string
-  );
   await db.runAsync(
     `
       INSERT OR REPLACE INTO game_states (
@@ -309,5 +305,4 @@ async function saveGameState(
       gameState.synced ? 1 : 0,
     ]
   );
-  console.log('Game state saved:', gameState.puzzle_string);
 }
