@@ -139,12 +139,38 @@ export function useCreateGame() {
 
   return useMutation({
     mutationFn: async ({
-      puzzleString,
+      difficulty,
       userId,
     }: {
-      puzzleString: string;
+      difficulty: DifficultyLevel;
       userId?: string;
     }) => {
+      // Fetch puzzles for the selected difficulty
+      const puzzles = await db.getAllAsync<{
+        puzzle_string: string;
+        rating: number;
+        difficulty: DifficultyLevel;
+        is_symmetric: number;
+        clue_count: number;
+        source: string;
+        created_at: string;
+      }>(
+        // TODO: avoid fetching existing active games or completed puzzles or daily challenges
+        `SELECT * FROM puzzles WHERE difficulty = ? LIMIT 100`,
+        [difficulty]
+      );
+
+      if (!puzzles || puzzles.length === 0) {
+        throw new Error(
+          `No puzzles available for difficulty: ${difficulty}`
+        );
+      }
+
+      // Select a random puzzle
+      const randomPuzzle =
+        puzzles[Math.floor(Math.random() * puzzles.length)];
+      const puzzleString = randomPuzzle.puzzle_string;
+
       const initialState = [];
       for (let i = 0; i < 81; i++) {
         const value =
@@ -256,6 +282,10 @@ async function saveGameState(
   db: SQLiteDatabase,
   gameState: LocalGameState
 ) {
+  console.log(
+    'Saving game state:',
+    gameState.puzzle_string
+  );
   await db.runAsync(
     `
       INSERT OR REPLACE INTO game_states (
@@ -279,4 +309,5 @@ async function saveGameState(
       gameState.synced ? 1 : 0,
     ]
   );
+  console.log('Game state saved:', gameState.puzzle_string);
 }

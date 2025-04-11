@@ -197,7 +197,7 @@ export function useGameStateSync(
               `INSERT OR REPLACE INTO game_states (
               id, user_id, puzzle_string, current_state, notes, is_completed,
               hints_used, moves_history, created_at, updated_at, synced
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
               [
                 remoteGameState.id,
                 remoteGameState.user_id,
