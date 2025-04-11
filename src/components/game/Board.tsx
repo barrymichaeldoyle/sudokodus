@@ -78,18 +78,33 @@ export function Board({
     let cell: Cell | undefined;
 
     try {
-      // The current_state is stored as a JSON string in the database
-      // We need to parse it if it's a string, or use it directly if it's already an object
       const currentState =
         typeof gameState.current_state === 'string'
           ? JSON.parse(gameState.current_state)
           : gameState.current_state;
 
-      // Now we can safely cast it to our Cell[] type
       cell = (currentState as unknown as Cell[])[cellIndex];
     } catch (error) {
       console.error('Error parsing game state:', error);
     }
+
+    // Handle border classes
+    const borderTopClass =
+      row === 0 ? 'border-t-2 border-t-black' : '';
+    const borderLeftClass =
+      col === 0 ? 'border-l-2 border-l-black' : '';
+    const borderRightClass =
+      (col + 1) % 3 === 0
+        ? 'border-r-2 border-r-black'
+        : col === 8
+          ? 'border-r-2 border-r-black'
+          : 'border-r border-r-gray-300';
+    const borderBottomClass =
+      (row + 1) % 3 === 0
+        ? 'border-b-2 border-b-black'
+        : row === 8
+          ? 'border-b-2 border-b-black'
+          : 'border-b border-b-gray-300';
 
     if (!cell) {
       return (
@@ -99,15 +114,7 @@ export function Board({
             width: cellSize,
             height: cellSize,
           }}
-          className={`items-center justify-center ${
-            (col + 1) % 3 === 0
-              ? 'border-r-2 border-r-gray-400'
-              : 'border-r border-r-gray-300'
-          } ${
-            (row + 1) % 3 === 0
-              ? 'border-b-2 border-b-gray-400'
-              : 'border-b border-b-gray-300'
-          }`}
+          className={`items-center justify-center ${borderTopClass} ${borderLeftClass} ${borderRightClass} ${borderBottomClass}`}
         />
       );
     }
@@ -120,23 +127,12 @@ export function Board({
       selectedCell?.col === col;
     const isRelated = isRelatedCell(row, col);
 
-    // Determine cell background color based on selection and related cells
     let bgColorClass = 'bg-white';
     if (isSelected) {
-      bgColorClass = 'bg-blue-50'; // Light blue for selected cell
+      bgColorClass = 'bg-blue-50';
     } else if (isRelated) {
-      bgColorClass = 'bg-gray-100'; // Light gray for related cells
+      bgColorClass = 'bg-gray-100';
     }
-
-    // Add border styling for 3x3 boxes
-    const borderRightClass =
-      (col + 1) % 3 === 0
-        ? 'border-r-2 border-r-gray-400'
-        : 'border-r border-r-gray-300';
-    const borderBottomClass =
-      (row + 1) % 3 === 0
-        ? 'border-b-2 border-b-gray-400'
-        : 'border-b border-b-gray-300';
 
     return (
       <TouchableOpacity
@@ -145,10 +141,10 @@ export function Board({
           width: cellSize,
           height: cellSize,
         }}
-        className={`items-center justify-center border-gray-300 ${bgColorClass} ${borderRightClass} ${borderBottomClass}`}
+        className={`items-center justify-center ${bgColorClass} ${borderTopClass} ${borderLeftClass} ${borderRightClass} ${borderBottomClass}`}
         onPress={() => handleCellPress(row, col)}
       >
-        {value !== null ? (
+        {value !== null && value !== 0 ? (
           <Text
             className={`text-xl font-bold ${isGiven ? 'text-black' : 'text-blue-600'}`}
           >
@@ -181,7 +177,7 @@ export function Board({
         width: boardSize,
         height: boardSize,
       }}
-      className="self-center border-2 border-gray-400"
+      className="self-center"
     >
       {Array.from({ length: 9 }, (_, row) => (
         <View key={row} className="flex-row">
