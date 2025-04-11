@@ -1,4 +1,8 @@
-import { useQuery } from '@tanstack/react-query';
+import {
+  QueryKey,
+  useQuery,
+  UseQueryResult,
+} from '@tanstack/react-query';
 
 import { useSQLiteContext } from 'expo-sqlite';
 import { supabase } from '../db/supabase';
@@ -11,19 +15,19 @@ import {
 
 export function getDailyChallengesQueryKey(
   date: DateString
-) {
+): QueryKey {
   return ['dailyChallenges', date];
 }
 export function getDailyChallengeQueryKey(
   date: DateString,
   difficulty: DifficultyLevel
-) {
+): QueryKey {
   return ['dailyChallenge', date, difficulty];
 }
 
 export function useDailyChallenges(
   date: Date = new Date()
-) {
+): UseQueryResult<DailyChallenge[]> {
   const db = useSQLiteContext();
   const formattedDate = formatDate(date);
 
@@ -143,7 +147,7 @@ export function useDailyChallenges(
 export function useDailyChallenge(
   date: Date = new Date(),
   difficulty: DifficultyLevel
-) {
+): UseQueryResult<DailyChallenge> {
   const db = useSQLiteContext();
   const formattedDate = formatDate(date);
 

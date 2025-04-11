@@ -63,7 +63,7 @@ export function DatabaseProvider({
       CREATE TABLE IF NOT EXISTS game_states (
         id TEXT PRIMARY KEY,
         user_id TEXT,
-        puzzle_string TEXT NOT NULL,
+        puzzle_string TEXT NOT NULL UNIQUE,
         current_state TEXT NOT NULL,
         notes TEXT,
         is_completed INTEGER DEFAULT 0,

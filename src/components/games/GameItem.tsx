@@ -2,11 +2,11 @@ import { router } from 'expo-router';
 import { Text, TouchableOpacity, View } from 'react-native';
 
 import { DIFFICULTY_LABELS_MAP } from '../../db/types';
-import { GameStateWithDifficulty } from '../../hooks/useGameStates';
+import { LocalGameStateWithPuzzle } from '../../hooks/useGameStates';
 import { MiniSudokuGrid } from './MiniSudokuGrid';
 
 interface GameItemProps {
-  game: GameStateWithDifficulty;
+  game: LocalGameStateWithPuzzle;
 }
 
 const DIFFICULTY_COLORS = {

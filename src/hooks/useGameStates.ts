@@ -1,7 +1,10 @@
 import {
+  QueryKey,
   useMutation,
+  UseMutationResult,
   useQuery,
   useQueryClient,
+  UseQueryResult,
 } from '@tanstack/react-query';
 import {
   SQLiteDatabase,
@@ -13,19 +16,26 @@ import {
 } from '../db/types';
 import { generateId } from '../db/utils/generateId';
 
-export function getActiveGamesQueryKey(userId?: string) {
+export function getActiveGamesQueryKey(
+  userId?: string
+): QueryKey {
   return ['activeGames', userId];
 }
-export function getCompletedGamesQueryKey(userId?: string) {
+export function getCompletedGamesQueryKey(
+  userId?: string
+): QueryKey {
   return ['completedGames', userId];
 }
-export function getGameStateQueryKey(puzzleString: string) {
+export function getGameStateQueryKey(
+  puzzleString: string
+): QueryKey {
   return ['gameState', puzzleString];
 }
 
-export interface GameStateWithDifficulty
+export interface LocalGameStateWithPuzzle
   extends LocalGameState {
   difficulty: DifficultyLevel;
+  rating: number;
 }
 
 /**
@@ -39,7 +49,10 @@ function getGamesQuery({
   isCompleted: boolean;
   userId?: string;
   limit?: number;
-}) {
+}): {
+  query: string;
+  params: (string | number)[];
+} {
   const baseQuery = `
     SELECT gs.*, p.difficulty 
     FROM game_states gs
@@ -65,7 +78,7 @@ function getGamesQuery({
 export function useActiveGames(
   userId?: string,
   limit = 100
-) {
+): UseQueryResult<LocalGameStateWithPuzzle[]> {
   const db = useSQLiteContext();
   const { query, params } = getGamesQuery({
     isCompleted: false,
@@ -76,7 +89,7 @@ export function useActiveGames(
   return useQuery({
     queryKey: getActiveGamesQueryKey(userId),
     queryFn: () =>
-      db.getAllAsync<GameStateWithDifficulty>(
+      db.getAllAsync<LocalGameStateWithPuzzle>(
         query,
         params
       ),
@@ -92,7 +105,7 @@ export function useActiveGames(
 export function useCompletedGames(
   userId?: string,
   limit = 100
-) {
+): UseQueryResult<LocalGameStateWithPuzzle[]> {
   const db = useSQLiteContext();
   const { query, params } = getGamesQuery({
     isCompleted: true,
@@ -103,7 +116,7 @@ export function useCompletedGames(
   return useQuery({
     queryKey: getCompletedGamesQueryKey(userId),
     queryFn: () =>
-      db.getAllAsync<GameStateWithDifficulty>(
+      db.getAllAsync<LocalGameStateWithPuzzle>(
         query,
         params
       ),
@@ -112,17 +125,22 @@ export function useCompletedGames(
 
 /**
  * Fetches a specific game state from the local database
- * @param id - The ID of the game state to fetch
+ * @param puzzleString - The puzzle string to fetch the game state for
  * @returns The react-query object for fetching the game state
  */
-export function useGameState(puzzleString: string) {
+export function useGameState(
+  puzzleString: string
+): UseQueryResult<LocalGameStateWithPuzzle | null> {
   const db = useSQLiteContext();
 
   return useQuery({
     queryKey: getGameStateQueryKey(puzzleString),
     queryFn: () =>
-      db.getFirstAsync<LocalGameState>(
-        `SELECT * FROM game_states WHERE puzzle_string = ?`,
+      db.getFirstAsync<LocalGameStateWithPuzzle>(
+        `SELECT gs.*, p.difficulty, p.rating
+         FROM game_states gs
+         LEFT JOIN puzzles p ON gs.puzzle_string = p.puzzle_string
+         WHERE gs.puzzle_string = ?`,
         [puzzleString]
       ),
     enabled: !!puzzleString,
@@ -133,18 +151,16 @@ export function useGameState(puzzleString: string) {
  * Creates a new game state
  * @returns The react-query object for creating a new game state
  */
-export function useCreateGame() {
+export function useCreateGame(): UseMutationResult<
+  LocalGameState,
+  Error,
+  { difficulty: DifficultyLevel; userId?: string }
+> {
   const db = useSQLiteContext();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
-      difficulty,
-      userId,
-    }: {
-      difficulty: DifficultyLevel;
-      userId?: string;
-    }) => {
+    mutationFn: async ({ difficulty, userId }) => {
       // Fetch puzzles for the selected difficulty
       const puzzles = await db.getAllAsync<{
         puzzle_string: string;
@@ -222,13 +238,16 @@ export function useCreateGame() {
  * Saves a game state
  * @returns The react-query object for saving a game state
  */
-export function useSaveGameState() {
+export function useSaveGameState(): UseMutationResult<
+  void,
+  Error,
+  LocalGameState
+> {
   const db = useSQLiteContext();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (gameState: LocalGameState) =>
-      saveGameState(db, gameState),
+    mutationFn: gameState => saveGameState(db, gameState),
     onSuccess: (_, variables) => {
       // Invalidate relevant queries
       queryClient.invalidateQueries({
@@ -281,7 +300,7 @@ export function useDeleteGame() {
 async function saveGameState(
   db: SQLiteDatabase,
   gameState: LocalGameState
-) {
+): Promise<void> {
   await db.runAsync(
     `
       INSERT OR REPLACE INTO game_states (

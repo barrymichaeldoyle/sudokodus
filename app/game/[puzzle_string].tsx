@@ -5,11 +5,11 @@ import { Game } from '../../src/components/game/Game';
 import { usePostHogCapture } from '../../src/hooks/usePostHogCapture';
 
 export default function GameScreen() {
-  const { id: puzzleString } = useLocalSearchParams<{
-    id: string;
+  const { puzzle_string } = useLocalSearchParams<{
+    puzzle_string: string;
   }>();
   usePostHogCapture('game_opened', {
-    puzzle_string: puzzleString,
+    puzzle_string,
   });
 
   return (
@@ -22,7 +22,7 @@ export default function GameScreen() {
           headerTintColor: white,
         }}
       />
-      <Game puzzleString={puzzleString} />
+      <Game puzzleString={puzzle_string} />
     </>
   );
 }

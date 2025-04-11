@@ -50,5 +50,10 @@ export type LocalGameState = GameState & {
   synced?: boolean;
 };
 
+/**
+ * A date string in the format of `"yyyy-mm-dd"`.
+ * @type {DateString}
+ */
 export type DateString =
+  // yyyy                              -  mm              -  dd
   `${number}${number}${number}${number}-${number}${number}-${number}${number}`;

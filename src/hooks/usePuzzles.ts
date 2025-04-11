@@ -1,4 +1,7 @@
-import { useQuery } from '@tanstack/react-query';
+import {
+  useQuery,
+  UseQueryResult,
+} from '@tanstack/react-query';
 import { useSQLiteContext } from 'expo-sqlite';
 import { DifficultyLevel, Puzzle } from '../db/types';
 
@@ -18,7 +21,9 @@ export function getPuzzleQueryKey(
  * @param puzzleString - The string representation of the puzzle to fetch
  * @returns The react-query object for fetching the puzzle
  */
-export function usePuzzle(puzzleString: string | null) {
+export function usePuzzle(
+  puzzleString: string | null
+): UseQueryResult<Puzzle> {
   const db = useSQLiteContext();
 
   return useQuery({
