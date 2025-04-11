@@ -26,9 +26,13 @@ export function DatabaseProvider({
     try {
       console.log('Starting database initialization...');
 
-      // Disable WAL mode
-      await db.execAsync(`PRAGMA journal_mode = DELETE;`);
-      console.log('Disabled WAL mode');
+      // // Disable WAL mode
+      /**
+       * Leaving this commented out because it's not needed.
+       * But we might need it later, preferably not though.
+       */
+      // await db.execAsync(`PRAGMA journal_mode = DELETE;`);
+      // console.log('Disabled WAL mode');
 
       // Create tables and indexes
       await db.execAsync(`
