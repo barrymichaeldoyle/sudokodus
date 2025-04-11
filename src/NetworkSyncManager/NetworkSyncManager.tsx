@@ -6,6 +6,7 @@ import {
   PropsWithChildren,
   useCallback,
   useEffect,
+  useRef,
   useState,
 } from 'react';
 
@@ -37,6 +38,12 @@ export function NetworkSyncManager({
   const [retryCount, setRetryCount] = useState(0);
   const [isSupabaseAvailable, setIsSupabaseAvailable] =
     useState(true);
+  const [
+    puzzleCountsSufficient,
+    setPuzzleCountsSufficient,
+  ] = useState(false);
+  const lastPuzzleSyncAttempt = useRef<number>(0);
+  const PUZZLE_SYNC_COOLDOWN = 5 * 60 * 1000; // 5 minutes cooldown
 
   const checkSupabaseClient = useCallback(async () => {
     if (!supabase?.from) {
@@ -92,8 +99,10 @@ export function NetworkSyncManager({
     checkSupabaseClient
   );
 
-  const { syncPuzzlesFromSupabase } =
-    usePuzzleSync(netInfo);
+  const { syncPuzzlesFromSupabase } = usePuzzleSync(
+    netInfo,
+    setPuzzleCountsSufficient
+  );
   const { syncDailyChallengesFromSupabase } =
     useDailyChallengeSync(netInfo);
 
@@ -116,28 +125,6 @@ export function NetworkSyncManager({
         )
       `);
 
-      // Check if we need to sync puzzles
-      const [depletedResult, lastSyncResult] =
-        await Promise.all([
-          db.getAllAsync<{ value: string }>(
-            `SELECT value FROM app_settings WHERE key = 'puzzle_database_depleted'`
-          ),
-          db.getAllAsync<{ value: string }>(
-            `SELECT value FROM app_settings WHERE key = 'last_puzzle_sync'`
-          ),
-        ]);
-
-      const isPuzzleDatabaseDepleted =
-        depletedResult[0]?.value === 'true';
-      const lastPuzzleSync = lastSyncResult[0]?.value
-        ? new Date(lastSyncResult[0].value)
-        : null;
-      const shouldSyncPuzzles =
-        !isPuzzleDatabaseDepleted &&
-        (!lastPuzzleSync ||
-          Date.now() - lastPuzzleSync.getTime() >
-            SYNC_INTERVAL);
-
       const isSupabaseReady = await checkSupabaseClient();
       if (!isSupabaseReady) {
         console.error(
@@ -146,12 +133,15 @@ export function NetworkSyncManager({
         return;
       }
 
-      if (shouldSyncPuzzles) {
+      // Only sync puzzles if counts are not sufficient and cooldown has passed
+      const now = Date.now();
+      if (
+        !puzzleCountsSufficient &&
+        now - lastPuzzleSyncAttempt.current >
+          PUZZLE_SYNC_COOLDOWN
+      ) {
+        lastPuzzleSyncAttempt.current = now;
         await syncPuzzlesFromSupabase();
-        await db.runAsync(
-          `INSERT OR REPLACE INTO app_settings (key, value) VALUES (?, ?)`,
-          ['last_puzzle_sync', new Date().toISOString()]
-        );
       }
 
       // Always sync daily challenges
@@ -163,12 +153,12 @@ export function NetworkSyncManager({
         await syncGameStatesFromSupabase();
       }
 
-      const now = new Date();
-      setLastSyncTime(now);
+      const syncTime = new Date();
+      setLastSyncTime(syncTime);
 
       await db.runAsync(
         `INSERT OR REPLACE INTO app_settings (key, value) VALUES (?, ?)`,
-        ['last_sync_time', now.toISOString()]
+        ['last_sync_time', syncTime.toISOString()]
       );
     } catch (error) {
       console.error('Sync error:', error);
@@ -191,6 +181,7 @@ export function NetworkSyncManager({
     syncGameStatesFromSupabase,
     syncPuzzlesFromSupabase,
     syncDailyChallengesFromSupabase,
+    puzzleCountsSufficient,
   ]);
 
   useEffect(() => {
@@ -199,17 +190,32 @@ export function NetworkSyncManager({
     }
   }, [netInfo.isConnected, isSupabaseAvailable, syncData]);
 
+  // Only set up interval for game state sync
   useEffect(() => {
     const intervalId = setInterval(() => {
-      if (netInfo.isConnected && isSupabaseAvailable) {
-        syncData();
+      if (
+        netInfo.isConnected &&
+        isSupabaseAvailable &&
+        user
+      ) {
+        // Only sync game states on interval
+        syncGameStatesToSupabase();
+        syncGameStatesFromSupabase();
       }
     }, SYNC_INTERVAL);
 
     return () => clearInterval(intervalId);
-  }, [netInfo.isConnected, isSupabaseAvailable, syncData]);
+  }, [
+    netInfo.isConnected,
+    isSupabaseAvailable,
+    user,
+    syncGameStatesToSupabase,
+    syncGameStatesFromSupabase,
+  ]);
 
   const manualSync = useCallback(async () => {
+    // Force puzzle sync on manual sync regardless of counts
+    setPuzzleCountsSufficient(false);
     await syncData();
   }, [syncData]);
 

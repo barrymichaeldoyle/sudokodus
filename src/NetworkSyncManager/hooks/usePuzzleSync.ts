@@ -7,7 +7,10 @@ import {
   PUZZLE_BATCH_SIZE,
 } from '../constants';
 
-export function usePuzzleSync(netInfo: any) {
+export function usePuzzleSync(
+  netInfo: any,
+  setPuzzleCountsSufficient: (value: boolean) => void
+) {
   const db = useSQLiteContext();
   const queryClient = useQueryClient();
 
@@ -15,15 +18,44 @@ export function usePuzzleSync(netInfo: any) {
     if (!netInfo.isConnected) return;
 
     try {
-      const localPuzzleCount = await db.getFirstAsync<{
+      // Check puzzle counts by difficulty
+      const difficultyCounts = await db.getAllAsync<{
+        difficulty: string;
         count: number;
-      }>(`SELECT COUNT(*) as count FROM puzzles`);
+      }>(`
+        SELECT difficulty, COUNT(*) as count 
+        FROM puzzles 
+        GROUP BY difficulty
+      `);
 
-      if (
-        localPuzzleCount &&
-        localPuzzleCount.count >= MIN_PUZZLE_COUNT
-      )
+      // Check if we need to sync any difficulty level
+      const needsSync = difficultyCounts.some(
+        ({ count }) => count < MIN_PUZZLE_COUNT
+      );
+
+      if (!needsSync) {
+        console.log(
+          'Local puzzle counts are sufficient, skipping sync'
+        );
+        setPuzzleCountsSufficient(true);
         return;
+      }
+
+      setPuzzleCountsSufficient(false);
+
+      // Check if remote database is depleted
+      const depletedResult = await db.getAllAsync<{
+        value: string;
+      }>(
+        `SELECT value FROM app_settings WHERE key = 'puzzle_database_depleted'`
+      );
+
+      if (depletedResult[0]?.value === 'true') {
+        console.log(
+          'Remote puzzle database is depleted, skipping sync'
+        );
+        return;
+      }
 
       const { data: remotePuzzles, error } = await supabase
         .from('puzzles')
@@ -89,7 +121,12 @@ export function usePuzzleSync(netInfo: any) {
       );
       throw error;
     }
-  }, [db, netInfo.isConnected, queryClient]);
+  }, [
+    db,
+    netInfo.isConnected,
+    queryClient,
+    setPuzzleCountsSufficient,
+  ]);
 
   return {
     syncPuzzlesFromSupabase,
