@@ -46,7 +46,6 @@ CREATE TABLE IF NOT EXISTS public.game_states (
   current_state JSONB NOT NULL,
   notes JSONB,
   is_completed BOOLEAN DEFAULT false,
-  moves_count INTEGER DEFAULT 0,
   hints_used INTEGER DEFAULT 0,
   moves_history JSONB[], -- Array of moves for undo functionality
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),

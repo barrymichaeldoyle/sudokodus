@@ -67,7 +67,6 @@ export function DatabaseProvider({
         current_state TEXT NOT NULL,
         notes TEXT,
         is_completed INTEGER DEFAULT 0,
-        moves_count INTEGER DEFAULT 0,
         hints_used INTEGER DEFAULT 0,
         moves_history TEXT,
         created_at TEXT NOT NULL,

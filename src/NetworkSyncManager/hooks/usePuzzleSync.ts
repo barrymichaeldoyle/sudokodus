@@ -29,9 +29,12 @@ export function usePuzzleSync(
       `);
 
       // Check if we need to sync any difficulty level
-      const needsSync = difficultyCounts.some(
-        ({ count }) => count < MIN_PUZZLE_COUNT
-      );
+      // If difficultyCounts is empty, we definitely need to sync
+      const needsSync =
+        difficultyCounts.length === 0 ||
+        difficultyCounts.some(
+          ({ count }) => count < MIN_PUZZLE_COUNT
+        );
 
       if (!needsSync) {
         console.log(
