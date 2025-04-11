@@ -3,8 +3,8 @@ import {
   SQLiteProvider,
 } from 'expo-sqlite';
 import { PropsWithChildren, useRef, useState } from 'react';
-import { ErrorScreen } from '../components/ErrorScreen';
-import { LoadingScreen } from '../components/LoadingScreen';
+import { ErrorScreen } from '../components/PageQueryLoader/ErrorScreen';
+import { LoadingScreen } from '../components/PageQueryLoader/LoadingScreen';
 
 const SQLITE_DB_NAME = ':memory:';
 

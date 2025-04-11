@@ -1,57 +1,28 @@
-import {
-  ActivityIndicator,
-  FlatList,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { FlatList, View } from 'react-native';
 
 import { ActiveGamesListEmpty } from '../../src/components/games/ActiveGamesListEmpty';
 import { GameItem } from '../../src/components/games/GameItem';
+import { PageQueryLoader } from '../../src/components/PageQueryLoader/PageQueryLoader';
 import { useActiveGames } from '../../src/hooks/useGameStates';
 
 export default function ActiveGamesScreen() {
-  const {
-    data: activeGames,
-    isLoading,
-    error,
-    refetch,
-  } = useActiveGames();
-
-  if (isLoading) {
-    return (
-      <View className="flex flex-1 items-center justify-center">
-        <ActivityIndicator size="large" />
-        <Text>Loading active games...</Text>
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
-      <View className="flex flex-1 items-center justify-center">
-        <Text className="text-red-500">
-          Error loading games: {error.message}
-        </Text>
-        <TouchableOpacity
-          onPress={() => refetch()}
-          className="rounded-md bg-blue-500 p-2"
-        >
-          <Text className="text-white">Retry</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
+  const activeGamesQuery = useActiveGames();
 
   return (
-    <View className="flex flex-1">
-      <FlatList
-        data={activeGames}
-        keyExtractor={item => item.puzzle_string || ''}
-        renderItem={({ item }) => <GameItem game={item} />}
-        contentContainerClassName="flex-1 gap-2 p-4"
-        ListEmptyComponent={ActiveGamesListEmpty}
-      />
-    </View>
+    <PageQueryLoader query={activeGamesQuery}>
+      {activeGames => (
+        <View className="flex flex-1">
+          <FlatList
+            data={activeGames}
+            keyExtractor={item => item.puzzle_string || ''}
+            renderItem={({ item }) => (
+              <GameItem game={item} />
+            )}
+            contentContainerClassName="flex-1 gap-2 p-4"
+            ListEmptyComponent={ActiveGamesListEmpty}
+          />
+        </View>
+      )}
+    </PageQueryLoader>
   );
 }

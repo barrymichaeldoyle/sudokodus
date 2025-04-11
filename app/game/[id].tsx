@@ -1,7 +1,7 @@
 import { Stack, useLocalSearchParams } from 'expo-router';
-import { Text, View } from 'react-native';
 
 import { primary, white } from '../../src/colors';
+import { Game } from '../../src/components/game/Game';
 import { usePostHogCapture } from '../../src/hooks/usePostHogCapture';
 
 export default function GameScreen() {
@@ -22,9 +22,7 @@ export default function GameScreen() {
           headerTintColor: white,
         }}
       />
-      <View className="flex flex-1 items-center justify-center">
-        <Text>Puzzle String: {puzzleString}</Text>
-      </View>
+      <Game puzzleString={puzzleString} />
     </>
   );
 }
