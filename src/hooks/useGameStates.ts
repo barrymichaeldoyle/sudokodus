@@ -19,8 +19,8 @@ export function getActiveGamesQueryKey(userId?: string) {
 export function getCompletedGamesQueryKey(userId?: string) {
   return ['completedGames', userId];
 }
-export function getGameStateQueryKey(id: string | null) {
-  return ['gameState', id];
+export function getGameStateQueryKey(puzzleString: string) {
+  return ['gameState', puzzleString];
 }
 
 export interface GameStateWithDifficulty
@@ -115,17 +115,17 @@ export function useCompletedGames(
  * @param id - The ID of the game state to fetch
  * @returns The react-query object for fetching the game state
  */
-export function useGameState(id: string | null) {
+export function useGameState(puzzleString: string) {
   const db = useSQLiteContext();
 
   return useQuery({
-    queryKey: getGameStateQueryKey(id),
+    queryKey: getGameStateQueryKey(puzzleString),
     queryFn: () =>
       db.getFirstAsync<LocalGameState>(
-        `SELECT * FROM game_states WHERE id = ?`,
-        [id]
+        `SELECT * FROM game_states WHERE puzzle_string = ?`,
+        [puzzleString]
       ),
-    enabled: !!id,
+    enabled: !!puzzleString,
   });
 }
 
