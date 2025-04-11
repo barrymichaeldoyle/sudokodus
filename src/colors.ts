@@ -1,4 +1,5 @@
 export const primary = {
+  25: '#e3ebf1',
   50: '#c7d6e2',
   100: '#b7cad9',
   200: '#97b3c8',

@@ -9,6 +9,7 @@ import { PostHogProvider } from 'posthog-react-native';
 
 import { ActionSheetProvider } from '@expo/react-native-action-sheet';
 import '../global.css';
+import { primary } from '../src/colors';
 import { config } from '../src/config';
 import { DatabaseProvider } from '../src/db/DatabaseProvider';
 import { NetworkSyncManager } from '../src/NetworkSyncManager/NetworkSyncManager';
@@ -28,7 +29,13 @@ export default function RootLayout() {
         <QueryClientProvider client={queryClient}>
           <ActionSheetProvider>
             <NetworkSyncManager>
-              <Stack>
+              <Stack
+                screenOptions={{
+                  contentStyle: {
+                    backgroundColor: primary[25],
+                  },
+                }}
+              >
                 <Stack.Screen
                   name="(tabs)"
                   options={{ headerShown: false }}

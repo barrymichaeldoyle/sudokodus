@@ -16,6 +16,9 @@ export default function TabLayout() {
         tabBarInactiveTintColor: `${white}d9`, // hex with 85% opacity
         headerStyle: { backgroundColor: primary['500'] },
         headerTintColor: white,
+        sceneStyle: {
+          backgroundColor: primary[25],
+        },
       }}
     >
       <Tabs.Screen

@@ -11,7 +11,7 @@ export default function HomeScreen() {
       <Stack.Screen options={{ title: 'SudokoduS' }} />
       <View className="flex flex-1 justify-between gap-2 px-4 py-16">
         <View className="flex flex-col items-center justify-center">
-          <View className="flex w-2/3 flex-col items-center justify-center gap-4 rounded-3xl bg-[#D9D9D9] py-16">
+          <View className="flex w-2/3 flex-col items-center justify-center gap-4 rounded-3xl bg-white py-16 shadow-custom">
             <View className="flex flex-col items-center justify-between gap-1 font-medium">
               <Text>Daily Challenges</Text>
               <Text>coming soon!</Text>

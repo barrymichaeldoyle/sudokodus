@@ -129,9 +129,9 @@ export function Board({
 
     let bgColorClass = 'bg-white';
     if (isSelected) {
-      bgColorClass = 'bg-blue-50';
+      bgColorClass = 'bg-primary-100';
     } else if (isRelated) {
-      bgColorClass = 'bg-gray-100';
+      bgColorClass = 'bg-primary-25';
     }
 
     return (
@@ -173,11 +173,8 @@ export function Board({
   // Render the entire board
   return (
     <View
-      style={{
-        width: boardSize,
-        height: boardSize,
-      }}
-      className="self-center"
+      style={{ height: boardSize, width: boardSize }}
+      className="shadow-custom"
     >
       {Array.from({ length: 9 }, (_, row) => (
         <View key={row} className="flex-row">
