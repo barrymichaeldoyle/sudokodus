@@ -2,6 +2,7 @@ import { Stack, useLocalSearchParams } from 'expo-router';
 
 import { primary, white } from '../../src/colors';
 import { Game } from '../../src/components/game/Game';
+import { ScreenContainer } from '../../src/components/ScreenContainer';
 import { usePostHogCapture } from '../../src/hooks/usePostHogCapture';
 
 export default function GameScreen() {
@@ -13,7 +14,7 @@ export default function GameScreen() {
   });
 
   return (
-    <>
+    <ScreenContainer>
       <Stack.Screen
         options={{
           title: 'SudokoduS',
@@ -23,6 +24,6 @@ export default function GameScreen() {
         }}
       />
       <Game puzzleString={puzzle_string} />
-    </>
+    </ScreenContainer>
   );
 }

@@ -4,10 +4,11 @@ import { Text, View } from 'react-native';
 
 import { primary } from '../../src/colors';
 import { NewGameButton } from '../../src/components/NewGameButton';
+import { ScreenContainer } from '../../src/components/ScreenContainer';
 
 export default function HomeScreen() {
   return (
-    <>
+    <ScreenContainer>
       <Stack.Screen options={{ title: 'SudokoduS' }} />
       <View className="flex flex-1 justify-between gap-2 px-4 py-16">
         <View className="flex flex-col items-center justify-center">
@@ -30,6 +31,6 @@ export default function HomeScreen() {
           <NewGameButton />
         </View>
       </View>
-    </>
+    </ScreenContainer>
   );
 }

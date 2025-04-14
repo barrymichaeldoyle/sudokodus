@@ -1,9 +1,10 @@
 import { Link, Stack } from 'expo-router';
 import { Text, View } from 'react-native';
+import { ScreenContainer } from '../src/components/ScreenContainer';
 
 export default function NotFoundScreen() {
   return (
-    <>
+    <ScreenContainer>
       <Stack.Screen
         options={{
           title: 'SudokoduS',
@@ -16,6 +17,6 @@ export default function NotFoundScreen() {
           Go back to Home screen!
         </Link>
       </View>
-    </>
+    </ScreenContainer>
   );
 }
