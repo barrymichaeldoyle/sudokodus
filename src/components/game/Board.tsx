@@ -129,9 +129,9 @@ export function Board({
 
     let bgColorClass = 'bg-white';
     if (isSelected) {
-      bgColorClass = 'bg-primary-25';
+      bgColorClass = 'bg-game-selected';
     } else if (isRelated) {
-      bgColorClass = 'bg-primary-50';
+      bgColorClass = 'bg-game-related';
     }
 
     return (
