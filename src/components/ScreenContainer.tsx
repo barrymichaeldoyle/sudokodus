@@ -5,8 +5,6 @@ export function ScreenContainer({
   children,
 }: PropsWithChildren) {
   return (
-    <View className="flex-1 bg-primary-100">
-      {children}
-    </View>
+    <View className="flex-1 bg-primary-50">{children}</View>
   );
 }

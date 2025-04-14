@@ -3,7 +3,7 @@ import { Text, View } from 'react-native';
 import { DIFFICULTY_LABELS_MAP } from '../../db/types';
 import { useGameState } from '../../hooks/useGameStates';
 import { PageQueryLoader } from '../PageQueryLoader/PageQueryLoader';
-import { Board } from './Board';
+import { Board } from './Board/Board';
 
 interface GameProps {
   puzzleString: string;

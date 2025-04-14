@@ -5,7 +5,8 @@ import {
   View,
   useWindowDimensions,
 } from 'react-native';
-import { LocalGameState } from '../../db/types';
+import { LocalGameState } from '../../../db/types';
+import { Controls } from './Controls';
 
 // Define the cell type based on how it's used in useCreateGame
 interface Cell {
@@ -17,24 +18,24 @@ interface Cell {
 interface BoardProps {
   gameState: LocalGameState;
   onCellPress?: (row: number, col: number) => void;
+  onNumberInput?: (number: number, isNote: boolean) => void;
 }
 
 export function Board({
   gameState,
   onCellPress,
+  onNumberInput,
 }: BoardProps) {
   const { width: screenWidth } = useWindowDimensions();
   const [selectedCell, setSelectedCell] = useState<{
     row: number;
     col: number;
   } | null>(null);
+  const [isNotesMode, setIsNotesMode] = useState(false);
 
-  // Calculate board size based on screen width
-  // We'll use the screen width minus some padding
-  const boardSize = screenWidth - 16; // 8px padding on each side
+  const boardSize = screenWidth - 16;
   const cellSize = boardSize / 9;
 
-  // Handle cell selection
   function handleCellPress(row: number, col: number) {
     setSelectedCell({ row, col });
     if (onCellPress) {
@@ -42,24 +43,36 @@ export function Board({
     }
   }
 
-  // Check if a cell is in the same row, column, or box as the selected cell
+  function handleNumberPress(number: number) {
+    if (onNumberInput) {
+      onNumberInput(number, isNotesMode);
+    }
+  }
+
+  function handleClearPress() {
+    if (onNumberInput) {
+      onNumberInput(0, false);
+    }
+  }
+
+  function handleNotesPress() {
+    setIsNotesMode(!isNotesMode);
+  }
+
   function isRelatedCell(row: number, col: number) {
     if (!selectedCell) return false;
 
     const { row: selectedRow, col: selectedCol } =
       selectedCell;
 
-    // Same row
     if (row === selectedRow) {
       return true;
     }
 
-    // Same column
     if (col === selectedCol) {
       return true;
     }
 
-    // Same 3x3 box
     const boxRow = Math.floor(row / 3);
     const boxCol = Math.floor(col / 3);
     const selectedBoxRow = Math.floor(selectedRow / 3);
@@ -70,11 +83,9 @@ export function Board({
     );
   }
 
-  // Render a single cell
   function renderCell(row: number, col: number) {
     const cellIndex = row * 9 + col;
 
-    // Safely access the current_state
     let cell: Cell | undefined;
 
     try {
@@ -88,7 +99,6 @@ export function Board({
       console.error('Error parsing game state:', error);
     }
 
-    // Handle border classes
     const borderTopClass =
       row === 0 ? 'border-t-2 border-t-black' : '';
     const borderLeftClass =
@@ -129,18 +139,15 @@ export function Board({
 
     let bgColorClass = 'bg-white';
     if (isSelected) {
-      bgColorClass = 'bg-game-selected';
+      bgColorClass = 'bg-primary-100';
     } else if (isRelated) {
-      bgColorClass = 'bg-game-related';
+      bgColorClass = 'bg-gray-100';
     }
 
     return (
       <TouchableOpacity
         key={`${row}-${col}`}
-        style={{
-          width: cellSize,
-          height: cellSize,
-        }}
+        style={{ width: cellSize, height: cellSize }}
         className={`items-center justify-center ${bgColorClass} ${borderTopClass} ${borderLeftClass} ${borderRightClass} ${borderBottomClass}`}
         onPress={() => handleCellPress(row, col)}
       >
@@ -170,19 +177,30 @@ export function Board({
     );
   }
 
-  // Render the entire board
   return (
-    <View
-      style={{ height: boardSize, width: boardSize }}
-      className="shadow-custom"
-    >
-      {Array.from({ length: 9 }, (_, row) => (
-        <View key={row} className="flex-row">
-          {Array.from({ length: 9 }, (_, col) =>
-            renderCell(row, col)
-          )}
-        </View>
-      ))}
+    <View className="items-center">
+      <View
+        style={{ height: boardSize, width: boardSize }}
+        className="shadow-custom"
+      >
+        {Array.from({ length: 9 }, (_, row) => (
+          <View key={row} className="flex-row">
+            {Array.from({ length: 9 }, (_, col) =>
+              renderCell(row, col)
+            )}
+          </View>
+        ))}
+      </View>
+      <View className="mt-6">
+        <Controls
+          onNumberPress={handleNumberPress}
+          onErasePress={() => {}}
+          onUndoPress={() => {}}
+          onHintPress={() => {}}
+          onNotesPress={handleNotesPress}
+          isNotesMode={isNotesMode}
+        />
+      </View>
     </View>
   );
 }
