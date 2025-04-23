@@ -5,10 +5,10 @@ import {
   View,
   useWindowDimensions,
 } from 'react-native';
-import { LocalGameState } from '../../../db/types';
-import { Controls } from './Controls';
 
-// Define the cell type based on how it's used in useCreateGame
+import { LocalGameState } from '../../../db/types';
+import { Controls } from './Controls/Controls';
+
 interface Cell {
   value: number | null;
   isGiven: boolean;
@@ -16,15 +16,13 @@ interface Cell {
 }
 
 interface BoardProps {
-  gameState: LocalGameState;
+  gameState: LocalGameState | null;
   onCellPress?: (row: number, col: number) => void;
-  onNumberInput?: (number: number, isNote: boolean) => void;
 }
 
 export function Board({
   gameState,
   onCellPress,
-  onNumberInput,
 }: BoardProps) {
   const { width: screenWidth } = useWindowDimensions();
   const [selectedCell, setSelectedCell] = useState<{
@@ -40,18 +38,6 @@ export function Board({
     setSelectedCell({ row, col });
     if (onCellPress) {
       onCellPress(row, col);
-    }
-  }
-
-  function handleNumberPress(number: number) {
-    if (onNumberInput) {
-      onNumberInput(number, isNotesMode);
-    }
-  }
-
-  function handleClearPress() {
-    if (onNumberInput) {
-      onNumberInput(0, false);
     }
   }
 
@@ -86,19 +72,6 @@ export function Board({
   function renderCell(row: number, col: number) {
     const cellIndex = row * 9 + col;
 
-    let cell: Cell | undefined;
-
-    try {
-      const currentState =
-        typeof gameState.current_state === 'string'
-          ? JSON.parse(gameState.current_state)
-          : gameState.current_state;
-
-      cell = (currentState as unknown as Cell[])[cellIndex];
-    } catch (error) {
-      console.error('Error parsing game state:', error);
-    }
-
     const borderTopClass =
       row === 0 ? 'border-t-2 border-t-black' : '';
     const borderLeftClass =
@@ -115,6 +88,32 @@ export function Board({
         : row === 8
           ? 'border-b-2 border-b-black'
           : 'border-b border-b-gray-300';
+
+    let cell: Cell | undefined;
+
+    if (!gameState) {
+      return (
+        <View
+          key={`${row}-${col}`}
+          style={{
+            width: cellSize,
+            height: cellSize,
+          }}
+          className={`items-center justify-center bg-white ${borderTopClass} ${borderLeftClass} ${borderRightClass} ${borderBottomClass}`}
+        />
+      );
+    }
+
+    try {
+      const currentState =
+        typeof gameState?.current_state === 'string'
+          ? JSON.parse(gameState.current_state)
+          : gameState?.current_state;
+
+      cell = (currentState as unknown as Cell[])[cellIndex];
+    } catch (error) {
+      console.error('Error parsing game state:', error);
+    }
 
     if (!cell) {
       return (
@@ -193,7 +192,6 @@ export function Board({
       </View>
       <View className="mt-6">
         <Controls
-          onNumberPress={handleNumberPress}
           onErasePress={() => {}}
           onUndoPress={() => {}}
           onHintPress={() => {}}

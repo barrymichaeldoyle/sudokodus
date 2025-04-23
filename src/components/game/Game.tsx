@@ -1,9 +1,9 @@
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
 
-import { DIFFICULTY_LABELS_MAP } from '../../db/types';
 import { useGameState } from '../../hooks/useGameStates';
 import { PageQueryLoader } from '../PageQueryLoader/PageQueryLoader';
 import { Board } from './Board/Board';
+import { Details } from './Details/Details';
 
 interface GameProps {
   puzzleString: string;
@@ -13,30 +13,18 @@ export function Game({ puzzleString }: GameProps) {
   const gameStateQuery = useGameState(puzzleString);
 
   return (
-    <PageQueryLoader query={gameStateQuery}>
-      {gameState => (
-        <View className="flex flex-1 flex-col items-center justify-start">
-          <View className="flex w-full flex-row justify-around py-6">
-            <View className="flex flex-row items-center gap-1">
-              <Text className="font-bold">Difficulty:</Text>
-              <Text>
-                {
-                  DIFFICULTY_LABELS_MAP[
-                    gameState.difficulty
-                  ]
-                }
-              </Text>
-            </View>
-            <View className="flex flex-row items-center gap-1">
-              <Text className="font-bold">Rating:</Text>
-              <Text>{gameState.rating}</Text>
+    <View className="flex flex-1 flex-col">
+      <PageQueryLoader query={gameStateQuery} ignoreLoading>
+        {({ data: gameState, isLoading }) => (
+          <View className="flex flex-1 flex-col items-center justify-start">
+            <Details gameState={gameState} />
+            <View className="flex flex-1 justify-start">
+              <Board gameState={gameState} />
             </View>
           </View>
-          <View className="flex flex-1 justify-start">
-            <Board gameState={gameState} />
-          </View>
-        </View>
-      )}
-    </PageQueryLoader>
+        )}
+      </PageQueryLoader>
+      <View className="h-24 w-full bg-primary-500" />
+    </View>
   );
 }

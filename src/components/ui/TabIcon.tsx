@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { SFSymbol, SymbolView } from 'expo-symbols';
+import { type SFSymbol, SymbolView } from 'expo-symbols';
 import { Platform } from 'react-native';
 
 interface TabIconProps {

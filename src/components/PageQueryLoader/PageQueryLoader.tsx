@@ -1,20 +1,41 @@
 import { UseQueryResult } from '@tanstack/react-query';
 import { ReactNode } from 'react';
+
 import { ErrorScreen } from './ErrorScreen';
 import { LoadingScreen } from './LoadingScreen';
 
-interface PageQueryLoaderProps<T> {
+type QueryData<T, B extends boolean> = B extends true
+  ? T
+  : NonNullable<T>;
+
+interface PageQueryLoaderProps<
+  T,
+  B extends boolean = false,
+> {
   query: UseQueryResult<T>;
   children:
-    | ((data: NonNullable<T>) => ReactNode)
+    | (({
+        data,
+        isLoading,
+        error,
+      }: {
+        data: QueryData<T, B>;
+        isLoading: boolean;
+        error: Error | null;
+      }) => ReactNode)
     | ReactNode;
+  ignoreLoading?: B;
 }
 
-export function PageQueryLoader<T>({
+export function PageQueryLoader<
+  T,
+  B extends boolean = false,
+>({
   children,
   query,
-}: PageQueryLoaderProps<T>) {
-  if (query.isLoading) {
+  ignoreLoading,
+}: PageQueryLoaderProps<T, B>) {
+  if (query.isLoading && !ignoreLoading) {
     return <LoadingScreen />;
   }
 
@@ -22,7 +43,7 @@ export function PageQueryLoader<T>({
     return <ErrorScreen message={query.error.message} />;
   }
 
-  if (!query.data) {
+  if (!query.data && !ignoreLoading) {
     return <ErrorScreen message="No data" />;
   }
 
@@ -31,7 +52,11 @@ export function PageQueryLoader<T>({
   }
 
   if (typeof children === 'function') {
-    return children(query.data as NonNullable<T>);
+    return children({
+      data: query.data as QueryData<T, B>,
+      isLoading: query.isLoading,
+      error: query.error,
+    });
   }
 
   return children;

@@ -12,7 +12,7 @@ export default function ActiveGamesScreen() {
   return (
     <ScreenContainer>
       <PageQueryLoader query={activeGamesQuery}>
-        {activeGames => (
+        {({ data: activeGames }) => (
           <View className="flex flex-1">
             <FlatList
               data={activeGames}
