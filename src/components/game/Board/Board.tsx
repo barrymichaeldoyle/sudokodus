@@ -29,7 +29,6 @@ export function Board({
     row: number;
     col: number;
   } | null>(null);
-  const [isNotesMode, setIsNotesMode] = useState(false);
 
   const boardSize = screenWidth - 16;
   const cellSize = boardSize / 9;
@@ -39,10 +38,6 @@ export function Board({
     if (onCellPress) {
       onCellPress(row, col);
     }
-  }
-
-  function handleNotesPress() {
-    setIsNotesMode(!isNotesMode);
   }
 
   function isRelatedCell(row: number, col: number) {
@@ -191,13 +186,7 @@ export function Board({
         ))}
       </View>
       <View className="mt-6">
-        <Controls
-          onErasePress={() => {}}
-          onUndoPress={() => {}}
-          onHintPress={() => {}}
-          onNotesPress={handleNotesPress}
-          isNotesMode={isNotesMode}
-        />
+        <Controls />
       </View>
     </View>
   );

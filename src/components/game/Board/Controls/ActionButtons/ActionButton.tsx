@@ -1,6 +1,6 @@
 import { type SFSymbol, SymbolView } from 'expo-symbols';
 import { TouchableOpacity } from 'react-native';
-import { primary } from '../../../../colors';
+import { primary } from '../../../../../colors';
 
 interface ActionButtonProps {
   icon: SFSymbol;
