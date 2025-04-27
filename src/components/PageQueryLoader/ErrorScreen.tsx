@@ -1,4 +1,5 @@
 import { Text, View } from 'react-native';
+
 import { Button } from '../ui/Button';
 
 interface ErrorScreenProps {

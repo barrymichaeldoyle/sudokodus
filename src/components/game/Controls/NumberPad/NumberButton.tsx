@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+
 import { useCurrentGameStateQuery } from '../../hooks/useCurrentGameStateQuery';
 
 interface NumberButtonProps {

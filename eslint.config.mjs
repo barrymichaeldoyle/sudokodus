@@ -17,6 +17,10 @@ export default [
         ecmaFeatures: { jsx: true },
       },
     },
+    env: {
+      browser: true,
+      node: true,
+    },
     plugins: {
       '@typescript-eslint': typescript,
       react,

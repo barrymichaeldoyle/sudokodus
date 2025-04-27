@@ -9,13 +9,6 @@ interface GameItemProps {
   game: LocalGameStateWithPuzzle;
 }
 
-const DIFFICULTY_COLORS = {
-  easy: 'text-green-600',
-  medium: 'text-blue-600',
-  hard: 'text-orange-600',
-  diabolical: 'text-red-600',
-} as const;
-
 export function GameItem({ game }: GameItemProps) {
   return (
     <TouchableOpacity

@@ -1,5 +1,6 @@
 import { Text, TouchableOpacity, View } from 'react-native';
 import { twMerge } from 'tailwind-merge';
+
 import { useCurrentGameStateQuery } from '../hooks/useCurrentGameStateQuery';
 
 interface CellData {
@@ -33,11 +34,11 @@ export function Cell({
     if (!gameState?.current_state) {
       return (
         <View
+          className={twMerge('items-center justify-center')} // Removed border classes
           style={{
             width: size,
             height: size,
           }}
-          className={twMerge('items-center justify-center')} // Removed border classes
         />
       );
     }
@@ -57,11 +58,11 @@ export function Cell({
   if (!cell) {
     return (
       <View
+        className={twMerge('items-center justify-center')} // Removed border classes
         style={{
           width: size,
           height: size,
         }}
-        className={twMerge('items-center justify-center')} // Removed border classes
       />
     );
   }
@@ -77,12 +78,12 @@ export function Cell({
 
   return (
     <TouchableOpacity
-      style={{ width: size, height: size }}
       className={twMerge(
         'items-center justify-center',
         bgColorClass
         // Removed border classes
       )}
+      style={{ width: size, height: size }}
       onPress={() => onPress(row, col)}
     >
       {value !== null && value !== 0 ? (
