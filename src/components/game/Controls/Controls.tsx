@@ -9,7 +9,7 @@ export function Controls() {
       <View className="flex-1">
         <ActionButtons />
       </View>
-      <View className="flex-1">
+      <View className="relative right-2 flex-1">
         <NumberPad />
       </View>
     </View>
