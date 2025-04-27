@@ -29,12 +29,15 @@ export function ActionButton({
     setIconSize(size * 0.5);
   }
 
+  function handlePress() {
+    console.log('pressed');
+    onPress();
+  }
+
   return (
-    <TouchableOpacity
-      onPress={onPress}
-      className="flex-1 p-2"
-    >
-      <View
+    <View className="flex-1 p-2">
+      <TouchableOpacity
+        onPress={handlePress}
         onLayout={handleLayout}
         className="aspect-square items-center justify-center rounded-md bg-white active:bg-primary-100"
       >
@@ -48,7 +51,7 @@ export function ActionButton({
             {label}
           </Text>
         </View>
-      </View>
-    </TouchableOpacity>
+      </TouchableOpacity>
+    </View>
   );
 }

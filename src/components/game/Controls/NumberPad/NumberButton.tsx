@@ -24,11 +24,9 @@ export function NumberButton({
   }
 
   return (
-    <TouchableOpacity
-      onPress={() => {}}
-      className="flex-1 p-1"
-    >
-      <View
+    <View className="flex-1 p-1">
+      <TouchableOpacity
+        onPress={() => console.log(number, 'pressed')}
         onLayout={handleLayout}
         className="aspect-square items-center justify-center rounded-full bg-white active:bg-primary-100"
       >
@@ -38,7 +36,7 @@ export function NumberButton({
         >
           {number}
         </Text>
-      </View>
-    </TouchableOpacity>
+      </TouchableOpacity>
+    </View>
   );
 }

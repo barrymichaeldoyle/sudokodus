@@ -6,7 +6,6 @@ const requiredEnvVars = [
 ] as const;
 
 function validateEnvVars() {
-  console.log('process.env', process.env);
   const missingVars = requiredEnvVars.filter(
     envVar => !process.env[envVar]
   );

@@ -9,24 +9,24 @@ export function ActionButtons() {
         <ActionButton
           icon="arrow.uturn.left"
           label="Undo"
-          onPress={() => {}}
+          onPress={() => console.log('undo')}
         />
         <ActionButton
           icon="eraser"
           label="Erase"
-          onPress={() => {}}
+          onPress={() => console.log('erase')}
         />
       </View>
       <View className="flex-1 flex-row">
         <ActionButton
           icon="questionmark.circle"
           label="Hint"
-          onPress={() => {}}
+          onPress={() => console.log('hint')}
         />
         <ActionButton
           icon="pencil"
           label="Note"
-          onPress={() => {}}
+          onPress={() => console.log('note')}
         />
       </View>
     </View>
