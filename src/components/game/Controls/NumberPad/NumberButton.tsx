@@ -32,7 +32,7 @@ export function NumberButton({
         disabled={isLoading}
         onPress={() => console.log(number, 'pressed')}
         onLayout={handleLayout}
-        className="aspect-square items-center justify-center rounded-full bg-white active:bg-primary-100"
+        className="aspect-square items-center justify-center rounded-full border-2 border-primary-500 bg-white active:bg-primary-100"
       >
         <Text
           className="font-bold text-primary-500"

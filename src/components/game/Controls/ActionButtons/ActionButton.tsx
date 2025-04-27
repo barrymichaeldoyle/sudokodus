@@ -43,7 +43,7 @@ export function ActionButton({
         disabled={isLoading}
         onPress={handlePress}
         onLayout={handleLayout}
-        className="aspect-square items-center justify-center rounded-md bg-white active:bg-primary-100"
+        className="aspect-square items-center justify-center rounded-md border-2 border-primary-500 bg-white active:bg-primary-100"
       >
         <View className="flex flex-col items-center gap-1">
           <SymbolView

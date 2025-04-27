@@ -1,7 +1,9 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback } from 'react';
+
 import { supabase } from '../../db/supabase';
+import { getDailyChallengesQueryKey } from '../../hooks/useDailyChallenges';
 import { useIsMounted } from '../../hooks/useIsMounted';
 
 export function useDailyChallengeSync(netInfo: any) {
@@ -137,7 +139,7 @@ export function useDailyChallengeSync(netInfo: any) {
 
           if (isMounted.current) {
             queryClient.invalidateQueries({
-              queryKey: ['dailyChallenges'],
+              queryKey: getDailyChallengesQueryKey(),
             });
           }
         } catch (error) {

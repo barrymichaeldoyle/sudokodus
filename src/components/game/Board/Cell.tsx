@@ -1,5 +1,6 @@
 import { Text, TouchableOpacity, View } from 'react-native';
 import { twMerge } from 'tailwind-merge';
+import { create } from 'zustand';
 
 import { useCurrentGameStateQuery } from '../hooks/useCurrentGameStateQuery';
 
@@ -9,32 +10,42 @@ interface CellData {
   notes: number[];
 }
 
+interface SelectedCellState {
+  selectedCell: { row: number; col: number } | null;
+  setSelectedCell: (row: number, col: number) => void;
+}
+
+export const useSelectedCellStore =
+  create<SelectedCellState>(set => ({
+    selectedCell: null,
+    setSelectedCell: (row, col) =>
+      set({ selectedCell: { row, col } }),
+  }));
+
 interface CellProps {
   size: number;
   row: number;
   col: number;
-  isSelected: boolean;
   isRelated: boolean;
-  onPress: (row: number, col: number) => void;
 }
 
 export function Cell({
   size,
   row,
   col,
-  isSelected,
   isRelated,
-  onPress,
 }: CellProps) {
   const { data: gameState } = useCurrentGameStateQuery();
   const cellIndex = row * 9 + col;
+  const { selectedCell, setSelectedCell } =
+    useSelectedCellStore();
 
   let cell: CellData | undefined;
   try {
     if (!gameState?.current_state) {
       return (
         <View
-          className={twMerge('items-center justify-center')} // Removed border classes
+          className={twMerge('items-center justify-center')}
           style={{
             width: size,
             height: size,
@@ -52,13 +63,14 @@ export function Cell({
       cellIndex
     ];
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('Error parsing game state:', error);
   }
 
   if (!cell) {
     return (
       <View
-        className={twMerge('items-center justify-center')} // Removed border classes
+        className={twMerge('items-center justify-center')}
         style={{
           width: size,
           height: size,
@@ -70,6 +82,8 @@ export function Cell({
   const { value, isGiven, notes } = cell;
 
   let bgColorClass = 'bg-white';
+  const isSelected =
+    selectedCell?.row === row && selectedCell?.col === col;
   if (isSelected) {
     bgColorClass = 'bg-primary-100';
   } else if (isRelated) {
@@ -81,10 +95,9 @@ export function Cell({
       className={twMerge(
         'items-center justify-center',
         bgColorClass
-        // Removed border classes
       )}
       style={{ width: size, height: size }}
-      onPress={() => onPress(row, col)}
+      onPress={() => setSelectedCell(row, col)}
     >
       {value !== null && value !== 0 ? (
         <Text

@@ -9,16 +9,12 @@ import { black, primary } from '../../../colors';
 
 import { Cell } from './Cell';
 
-interface BoardProps {
-  onCellPress?: (row: number, col: number) => void;
-}
-
 const thinLineColor = primary[200];
 const thickLineColor = black;
 const thinLineWidth = StyleSheet.hairlineWidth;
 const thickLineWidth = 2;
 
-export function Board({ onCellPress }: BoardProps) {
+export function Board() {
   const { width: screenWidth } = useWindowDimensions();
   const [selectedCell, setSelectedCell] = useState<{
     row: number;
@@ -30,9 +26,6 @@ export function Board({ onCellPress }: BoardProps) {
 
   function handleCellPress(row: number, col: number) {
     setSelectedCell({ row, col });
-    if (onCellPress) {
-      onCellPress(row, col);
-    }
   }
 
   function isRelatedCell(row: number, col: number) {

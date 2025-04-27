@@ -14,9 +14,12 @@ import {
 } from '../db/types';
 
 export function getDailyChallengesQueryKey(
-  date: DateString
+  date?: DateString
 ): QueryKey {
-  return ['dailyChallenges', date];
+  if (date) {
+    return ['dailyChallenges', date];
+  }
+  return ['dailyChallenges'];
 }
 export function getDailyChallengeQueryKey(
   date: DateString,
