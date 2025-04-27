@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import {
   StyleSheet,
-  View,
   useWindowDimensions,
+  View,
 } from 'react-native';
+
 import { black, primary } from '../../../colors';
+
 import { Cell } from './Cell';
 
 interface BoardProps {
@@ -34,11 +36,17 @@ export function Board({ onCellPress }: BoardProps) {
   }
 
   function isRelatedCell(row: number, col: number) {
-    if (!selectedCell) return false;
+    if (!selectedCell) {
+      return false;
+    }
     const { row: selectedRow, col: selectedCol } =
       selectedCell;
-    if (row === selectedRow) return true;
-    if (col === selectedCol) return true;
+    if (row === selectedRow) {
+      return true;
+    }
+    if (col === selectedCol) {
+      return true;
+    }
     const boxRow = Math.floor(row / 3);
     const boxCol = Math.floor(col / 3);
     const selectedBoxRow = Math.floor(selectedRow / 3);
@@ -86,22 +94,22 @@ export function Board({ onCellPress }: BoardProps) {
   return (
     <View className="flex flex-col items-center">
       <View
-        style={{ height: boardSize, width: boardSize }}
         className="bg-white shadow-custom"
+        style={{ height: boardSize, width: boardSize }}
       >
         {Array.from({ length: 9 }, (_, row) => (
           <View key={`row-${row}`} className="flex-row">
             {Array.from({ length: 9 }, (_, col) => (
               <Cell
                 key={`cell-${row}-${col}`}
-                size={cellSize}
-                row={row}
                 col={col}
+                isRelated={isRelatedCell(row, col)}
                 isSelected={
                   selectedCell?.row === row &&
                   selectedCell?.col === col
                 }
-                isRelated={isRelatedCell(row, col)}
+                row={row}
+                size={cellSize}
                 onPress={handleCellPress}
               />
             ))}
