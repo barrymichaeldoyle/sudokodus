@@ -6,7 +6,8 @@ import {
   useWindowDimensions,
 } from 'react-native';
 
-import { LocalGameState } from '../../../db/types';
+import { twMerge } from 'tailwind-merge';
+import { useCurrentGameStateQuery } from '../hooks/useCurrentGameStateQuery';
 
 interface Cell {
   value: number | null;
@@ -15,14 +16,11 @@ interface Cell {
 }
 
 interface BoardProps {
-  gameState: LocalGameState | null;
   onCellPress?: (row: number, col: number) => void;
 }
 
-export function Board({
-  gameState,
-  onCellPress,
-}: BoardProps) {
+export function Board({ onCellPress }: BoardProps) {
+  const { data: gameState } = useCurrentGameStateQuery();
   const { width: screenWidth } = useWindowDimensions();
   const [selectedCell, setSelectedCell] = useState<{
     row: number;
@@ -85,19 +83,6 @@ export function Board({
 
     let cell: Cell | undefined;
 
-    if (!gameState) {
-      return (
-        <View
-          key={`${row}-${col}`}
-          style={{
-            width: cellSize,
-            height: cellSize,
-          }}
-          className={`items-center justify-center bg-white ${borderTopClass} ${borderLeftClass} ${borderRightClass} ${borderBottomClass}`}
-        />
-      );
-    }
-
     try {
       const currentState =
         typeof gameState?.current_state === 'string'
@@ -117,7 +102,13 @@ export function Board({
             width: cellSize,
             height: cellSize,
           }}
-          className={`items-center justify-center ${borderTopClass} ${borderLeftClass} ${borderRightClass} ${borderBottomClass}`}
+          className={twMerge(
+            'items-center justify-center',
+            borderTopClass,
+            borderLeftClass,
+            borderRightClass,
+            borderBottomClass
+          )}
         />
       );
     }
