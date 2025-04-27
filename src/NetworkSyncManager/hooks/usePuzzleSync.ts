@@ -2,6 +2,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback } from 'react';
 import { supabase } from '../../db/supabase';
+import { useIsMounted } from '../../hooks/useIsMounted';
 import {
   MIN_PUZZLE_COUNT,
   PUZZLE_BATCH_SIZE,
@@ -13,9 +14,10 @@ export function usePuzzleSync(
 ) {
   const db = useSQLiteContext();
   const queryClient = useQueryClient();
+  const isMounted = useIsMounted();
 
   const syncPuzzlesFromSupabase = useCallback(async () => {
-    if (!netInfo.isConnected) return;
+    if (!netInfo.isConnected || !isMounted.current) return;
 
     try {
       // Check puzzle counts by difficulty
@@ -27,6 +29,8 @@ export function usePuzzleSync(
         FROM puzzles 
         GROUP BY difficulty
       `);
+
+      if (!isMounted.current) return;
 
       // Check if we need to sync any difficulty level
       // If difficultyCounts is empty, we definitely need to sync
@@ -40,11 +44,15 @@ export function usePuzzleSync(
         console.log(
           'Local puzzle counts are sufficient, skipping sync'
         );
-        setPuzzleCountsSufficient(true);
+        if (isMounted.current) {
+          setPuzzleCountsSufficient(true);
+        }
         return;
       }
 
-      setPuzzleCountsSufficient(false);
+      if (isMounted.current) {
+        setPuzzleCountsSufficient(false);
+      }
 
       // Check if remote database is depleted
       const depletedResult = await db.getAllAsync<{
@@ -52,6 +60,8 @@ export function usePuzzleSync(
       }>(
         `SELECT value FROM app_settings WHERE key = 'puzzle_database_depleted'`
       );
+
+      if (!isMounted.current) return;
 
       if (depletedResult[0]?.value === 'true') {
         console.log(
@@ -64,6 +74,8 @@ export function usePuzzleSync(
         .from('puzzles')
         .select('*')
         .limit(PUZZLE_BATCH_SIZE);
+
+      if (!isMounted.current) return;
 
       if (error) {
         console.error(
@@ -92,6 +104,11 @@ export function usePuzzleSync(
 
       try {
         for (const remotePuzzle of remotePuzzles) {
+          if (!isMounted.current) {
+            await db.execAsync('ROLLBACK');
+            return;
+          }
+
           await db.runAsync(
             `INSERT OR IGNORE INTO puzzles (
               puzzle_string, rating, difficulty, is_symmetric, clue_count, source, created_at
@@ -108,11 +125,18 @@ export function usePuzzleSync(
           );
         }
 
+        if (!isMounted.current) {
+          await db.execAsync('ROLLBACK');
+          return;
+        }
+
         await db.execAsync('COMMIT');
 
-        queryClient.invalidateQueries({
-          queryKey: ['puzzles'],
-        });
+        if (isMounted.current) {
+          queryClient.invalidateQueries({
+            queryKey: ['puzzles'],
+          });
+        }
       } catch (error) {
         await db.execAsync('ROLLBACK');
         throw error;
@@ -129,6 +153,7 @@ export function usePuzzleSync(
     netInfo.isConnected,
     queryClient,
     setPuzzleCountsSufficient,
+    isMounted,
   ]);
 
   return {

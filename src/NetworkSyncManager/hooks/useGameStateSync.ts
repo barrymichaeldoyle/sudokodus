@@ -4,6 +4,7 @@ import { useCallback } from 'react';
 import { supabase } from '../../db/supabase';
 import { LocalGameState } from '../../db/types';
 import { getGameStateQueryKey } from '../../hooks/useGameStates';
+import { useIsMounted } from '../../hooks/useIsMounted';
 import { handleRetry } from '../utils';
 
 export function useGameStateSync(
@@ -14,12 +15,14 @@ export function useGameStateSync(
 ) {
   const db = useSQLiteContext();
   const queryClient = useQueryClient();
+  const isMounted = useIsMounted();
 
   const syncGameStatesToSupabase = useCallback(async () => {
     if (
       !netInfo.isConnected ||
       !isSupabaseAvailable ||
-      !user
+      !user ||
+      !isMounted.current
     )
       return;
 
@@ -34,6 +37,8 @@ export function useGameStateSync(
             [user.id]
           );
 
+        if (!isMounted.current) return;
+
         if (unsyncedGameStates.length === 0) return;
 
         console.log(
@@ -41,6 +46,8 @@ export function useGameStateSync(
         );
 
         for (const gameState of unsyncedGameStates) {
+          if (!isMounted.current) return;
+
           const { data: existingData, error: checkError } =
             await supabase
               .from('game_states')
@@ -106,15 +113,19 @@ export function useGameStateSync(
             }
           }
 
+          if (!isMounted.current) return;
+
           await db.runAsync(
             `UPDATE game_states SET synced = 1 WHERE id = ?`,
             [gameState.id]
           );
         }
 
-        queryClient.invalidateQueries({
-          queryKey: getGameStateQueryKey(user.id),
-        });
+        if (isMounted.current) {
+          queryClient.invalidateQueries({
+            queryKey: getGameStateQueryKey(user.id),
+          });
+        }
       } catch (error) {
         console.error(
           'Error syncing game states to Supabase:',
@@ -130,11 +141,17 @@ export function useGameStateSync(
     queryClient,
     isSupabaseAvailable,
     checkSupabaseClient,
+    isMounted,
   ]);
 
   const syncGameStatesFromSupabase =
     useCallback(async () => {
-      if (!netInfo.isConnected || !user) return;
+      if (
+        !netInfo.isConnected ||
+        !user ||
+        !isMounted.current
+      )
+        return;
 
       try {
         const syncTimeResult = await db.getAllAsync<{
@@ -142,6 +159,8 @@ export function useGameStateSync(
         }>(
           `SELECT value FROM app_settings WHERE key = 'last_supabase_sync'`
         );
+
+        if (!isMounted.current) return;
 
         const lastSyncTimeStr = syncTimeResult[0]?.value;
         const lastSyncDate = lastSyncTimeStr
@@ -154,6 +173,8 @@ export function useGameStateSync(
             .select('*')
             .eq('user_id', user.id)
             .gt('updated_at', lastSyncDate.toISOString());
+
+        if (!isMounted.current) return;
 
         if (error) {
           console.error(
@@ -177,6 +198,11 @@ export function useGameStateSync(
 
         try {
           for (const remoteGameState of remoteGameStates) {
+            if (!isMounted.current) {
+              await db.execAsync('ROLLBACK');
+              return;
+            }
+
             const localGameState = await db.getFirstAsync<{
               updated_at: string;
             }>(
@@ -195,9 +221,9 @@ export function useGameStateSync(
 
             await db.runAsync(
               `INSERT OR REPLACE INTO game_states (
-              id, user_id, puzzle_string, current_state, notes, is_completed,
-              hints_used, moves_history, created_at, updated_at, synced
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            id, user_id, puzzle_string, current_state, notes, is_completed,
+            hints_used, moves_history, created_at, updated_at, synced
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
               [
                 remoteGameState.id,
                 remoteGameState.user_id,
@@ -253,8 +279,8 @@ export function useGameStateSync(
               if (puzzleData) {
                 await db.runAsync(
                   `INSERT OR IGNORE INTO puzzles (
-                  puzzle_string, rating, difficulty, is_symmetric, clue_count, source, created_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                puzzle_string, rating, difficulty, is_symmetric, clue_count, source, created_at
+              ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
                   [
                     puzzleData.puzzle_string,
                     puzzleData.rating,
@@ -269,6 +295,11 @@ export function useGameStateSync(
             }
           }
 
+          if (!isMounted.current) {
+            await db.execAsync('ROLLBACK');
+            return;
+          }
+
           const now = new Date().toISOString();
           await db.runAsync(
             `INSERT OR REPLACE INTO app_settings (key, value) VALUES (?, ?)`,
@@ -277,9 +308,11 @@ export function useGameStateSync(
 
           await db.execAsync('COMMIT');
 
-          queryClient.invalidateQueries({
-            queryKey: ['gameStates'],
-          });
+          if (isMounted.current) {
+            queryClient.invalidateQueries({
+              queryKey: ['gameStates'],
+            });
+          }
         } catch (error) {
           await db.execAsync('ROLLBACK');
           throw error;
@@ -291,7 +324,13 @@ export function useGameStateSync(
         );
         throw error;
       }
-    }, [db, user, netInfo.isConnected, queryClient]);
+    }, [
+      db,
+      netInfo.isConnected,
+      user,
+      queryClient,
+      isMounted,
+    ]);
 
   return {
     syncGameStatesToSupabase,

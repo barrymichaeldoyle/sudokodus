@@ -2,14 +2,18 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback } from 'react';
 import { supabase } from '../../db/supabase';
+import { useIsMounted } from '../../hooks/useIsMounted';
 
 export function useDailyChallengeSync(netInfo: any) {
   const db = useSQLiteContext();
   const queryClient = useQueryClient();
+  const isMounted = useIsMounted();
 
   const syncDailyChallengesFromSupabase =
     useCallback(async () => {
-      if (!netInfo.isConnected) return;
+      if (!netInfo.isConnected || !isMounted.current) {
+        return;
+      }
 
       try {
         const today = new Date()
@@ -23,6 +27,8 @@ export function useDailyChallengeSync(netInfo: any) {
           [today]
         );
 
+        if (!isMounted.current) return;
+
         if (todaysChallenges.length >= 4) return;
 
         const { data: remoteChallenges, error } =
@@ -30,6 +36,8 @@ export function useDailyChallengeSync(netInfo: any) {
             .from('daily_challenges')
             .select('*')
             .eq('date', today);
+
+        if (!isMounted.current) return;
 
         if (error) {
           console.error(
@@ -53,10 +61,15 @@ export function useDailyChallengeSync(netInfo: any) {
 
         try {
           for (const remoteChallenge of remoteChallenges) {
+            if (!isMounted.current) {
+              await db.execAsync('ROLLBACK');
+              return;
+            }
+
             await db.runAsync(
               `INSERT OR REPLACE INTO daily_challenges (
-              id, date, difficulty, puzzle_string
-            ) VALUES (?, ?, ?, ?)`,
+            id, date, difficulty, puzzle_string
+          ) VALUES (?, ?, ?, ?)`,
               [
                 remoteChallenge.id,
                 remoteChallenge.date,
@@ -99,8 +112,8 @@ export function useDailyChallengeSync(netInfo: any) {
               if (puzzleData) {
                 await db.runAsync(
                   `INSERT OR IGNORE INTO puzzles (
-                  puzzle_string, rating, difficulty, is_symmetric, clue_count, source, created_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                puzzle_string, rating, difficulty, is_symmetric, clue_count, source, created_at
+              ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
                   [
                     puzzleData.puzzle_string,
                     puzzleData.rating,
@@ -115,11 +128,18 @@ export function useDailyChallengeSync(netInfo: any) {
             }
           }
 
+          if (!isMounted.current) {
+            await db.execAsync('ROLLBACK');
+            return;
+          }
+
           await db.execAsync('COMMIT');
 
-          queryClient.invalidateQueries({
-            queryKey: ['dailyChallenges'],
-          });
+          if (isMounted.current) {
+            queryClient.invalidateQueries({
+              queryKey: ['dailyChallenges'],
+            });
+          }
         } catch (error) {
           await db.execAsync('ROLLBACK');
           throw error;
@@ -131,7 +151,7 @@ export function useDailyChallengeSync(netInfo: any) {
         );
         throw error;
       }
-    }, [db, netInfo.isConnected, queryClient]);
+    }, [db, netInfo.isConnected, queryClient, isMounted]);
 
   return {
     syncDailyChallengesFromSupabase,

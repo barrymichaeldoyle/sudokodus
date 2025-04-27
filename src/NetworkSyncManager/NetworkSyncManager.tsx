@@ -11,6 +11,7 @@ import {
 } from 'react';
 
 import { supabase } from '../db/supabase';
+import { useIsMounted } from '../hooks/useIsMounted';
 import {
   MAX_RETRY_ATTEMPTS,
   RETRY_DELAY,
@@ -28,6 +29,7 @@ export function NetworkSyncManager({
   useDrizzleStudio(db);
   const user = useUser();
   const netInfo = useNetInfo();
+  const isMounted = useIsMounted();
 
   const [isSyncing, setIsSyncing] = useState(false);
   const [lastSyncTime, setLastSyncTime] =
@@ -46,6 +48,7 @@ export function NetworkSyncManager({
   const PUZZLE_SYNC_COOLDOWN = 5 * 60 * 1000; // 5 minutes cooldown
 
   const checkSupabaseClient = useCallback(async () => {
+    if (!isMounted.current) return false;
     if (!supabase?.from) {
       console.error(
         'Supabase client not properly initialized'
@@ -54,7 +57,7 @@ export function NetworkSyncManager({
       return false;
     }
     return true;
-  }, []);
+  }, [isMounted]);
 
   const handleRetry = useCallback(
     async (operation: () => Promise<void>) => {
@@ -110,13 +113,16 @@ export function NetworkSyncManager({
     if (
       isSyncing ||
       !netInfo.isConnected ||
-      !isSupabaseAvailable
+      !isSupabaseAvailable ||
+      !isMounted.current
     )
       return;
 
     try {
       setIsSyncing(true);
       setSyncError(null);
+
+      if (!isMounted.current) return;
 
       await db.execAsync(`
         CREATE TABLE IF NOT EXISTS app_settings (
@@ -125,6 +131,8 @@ export function NetworkSyncManager({
         )
       `);
 
+      if (!isMounted.current) return;
+
       const isSupabaseReady = await checkSupabaseClient();
       if (!isSupabaseReady) {
         console.error(
@@ -132,6 +140,8 @@ export function NetworkSyncManager({
         );
         return;
       }
+
+      if (!isMounted.current) return;
 
       // Only sync puzzles if counts are not sufficient and cooldown has passed
       const now = Date.now();
@@ -144,14 +154,20 @@ export function NetworkSyncManager({
         await syncPuzzlesFromSupabase();
       }
 
+      if (!isMounted.current) return;
+
       // Always sync daily challenges
       await syncDailyChallengesFromSupabase();
+
+      if (!isMounted.current) return;
 
       // Only sync game states if user is logged in
       if (user) {
         await syncGameStatesToSupabase();
         await syncGameStatesFromSupabase();
       }
+
+      if (!isMounted.current) return;
 
       const syncTime = new Date();
       setLastSyncTime(syncTime);
@@ -161,6 +177,7 @@ export function NetworkSyncManager({
         ['last_sync_time', syncTime.toISOString()]
       );
     } catch (error) {
+      if (!isMounted.current) return;
       console.error('Sync error:', error);
       setSyncError(
         error instanceof Error
@@ -168,7 +185,9 @@ export function NetworkSyncManager({
           : new Error('Unknown sync error')
       );
     } finally {
-      setIsSyncing(false);
+      if (isMounted.current) {
+        setIsSyncing(false);
+      }
     }
   }, [
     isSyncing,
@@ -182,6 +201,7 @@ export function NetworkSyncManager({
     syncPuzzlesFromSupabase,
     syncDailyChallengesFromSupabase,
     puzzleCountsSufficient,
+    isMounted,
   ]);
 
   useEffect(() => {
