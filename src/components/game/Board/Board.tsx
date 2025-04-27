@@ -84,10 +84,29 @@ export function Board({ onCellPress }: BoardProps) {
     let cell: Cell | undefined;
 
     try {
+      if (!gameState?.current_state) {
+        return (
+          <View
+            key={`${row}-${col}`}
+            style={{
+              width: cellSize,
+              height: cellSize,
+            }}
+            className={twMerge(
+              'items-center justify-center',
+              borderTopClass,
+              borderLeftClass,
+              borderRightClass,
+              borderBottomClass
+            )}
+          />
+        );
+      }
+
       const currentState =
-        typeof gameState?.current_state === 'string'
+        typeof gameState.current_state === 'string'
           ? JSON.parse(gameState.current_state)
-          : gameState?.current_state;
+          : gameState.current_state;
 
       cell = (currentState as unknown as Cell[])[cellIndex];
     } catch (error) {
@@ -132,7 +151,14 @@ export function Board({ onCellPress }: BoardProps) {
       <TouchableOpacity
         key={`${row}-${col}`}
         style={{ width: cellSize, height: cellSize }}
-        className={`items-center justify-center ${bgColorClass} ${borderTopClass} ${borderLeftClass} ${borderRightClass} ${borderBottomClass}`}
+        className={twMerge(
+          'items-center justify-center',
+          bgColorClass,
+          borderTopClass,
+          borderLeftClass,
+          borderRightClass,
+          borderBottomClass
+        )}
         onPress={() => handleCellPress(row, col)}
       >
         {value !== null && value !== 0 ? (
