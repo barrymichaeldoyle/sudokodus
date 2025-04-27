@@ -3,6 +3,7 @@ import { View } from 'react-native';
 import { useGameState } from '../../hooks/useGameStates';
 import { PageQueryLoader } from '../PageQueryLoader/PageQueryLoader';
 import { Board } from './Board/Board';
+import { Controls } from './Controls/Controls';
 import { Details } from './Details/Details';
 
 interface GameProps {
@@ -16,11 +17,10 @@ export function Game({ puzzleString }: GameProps) {
     <View className="flex flex-1 flex-col">
       <PageQueryLoader query={gameStateQuery} ignoreLoading>
         {({ data: gameState, isLoading }) => (
-          <View className="flex flex-1 flex-col items-center justify-start">
+          <View className="flex flex-1 flex-col items-center justify-around">
             <Details gameState={gameState} />
-            <View className="flex flex-1 justify-start">
-              <Board gameState={gameState} />
-            </View>
+            <Board gameState={gameState} />
+            <Controls />
           </View>
         )}
       </PageQueryLoader>

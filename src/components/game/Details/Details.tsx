@@ -12,7 +12,7 @@ export function Details({ gameState }: DetailsProps) {
   const { difficulty, rating } = gameState ?? {};
 
   return (
-    <View className="flex w-full flex-row justify-around py-6">
+    <View className="flex w-full flex-row justify-around pt-4">
       <DetailItem
         label="Difficulty"
         value={

@@ -4,7 +4,7 @@ import { NumberButton } from './NumberButton';
 
 export function NumberPad() {
   return (
-    <View className="aspect-square flex-1">
+    <View className="aspect-square">
       <View className="flex-1 flex-row">
         {[1, 2, 3].map(number => (
           <NumberButton key={number} number={number} />

@@ -7,7 +7,6 @@ import {
 } from 'react-native';
 
 import { LocalGameState } from '../../../db/types';
-import { Controls } from './Controls/Controls';
 
 interface Cell {
   value: number | null;
@@ -172,7 +171,7 @@ export function Board({
   }
 
   return (
-    <View className="items-center">
+    <View className="flex flex-col items-center">
       <View
         style={{ height: boardSize, width: boardSize }}
         className="shadow-custom"
@@ -184,9 +183,6 @@ export function Board({
             )}
           </View>
         ))}
-      </View>
-      <View className="mt-6">
-        <Controls />
       </View>
     </View>
   );
