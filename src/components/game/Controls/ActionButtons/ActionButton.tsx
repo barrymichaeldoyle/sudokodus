@@ -7,6 +7,7 @@ import {
   View,
 } from 'react-native';
 import { primary } from '../../../../colors';
+import { useCurrentGameStateQuery } from '../../hooks/useCurrentGameStateQuery';
 
 interface ActionButtonProps {
   icon: SFSymbol;
@@ -19,6 +20,7 @@ export function ActionButton({
   label,
   onPress,
 }: ActionButtonProps) {
+  const { isLoading } = useCurrentGameStateQuery();
   const [iconSize, setIconSize] = useState(24);
 
   function handleLayout(e: LayoutChangeEvent) {
@@ -37,6 +39,7 @@ export function ActionButton({
   return (
     <View className="flex-1 p-2">
       <TouchableOpacity
+        disabled={isLoading}
         onPress={handlePress}
         onLayout={handleLayout}
         className="aspect-square items-center justify-center rounded-md bg-white active:bg-primary-100"

@@ -1,22 +1,18 @@
 import { View } from 'react-native';
 
-import { useGameState } from '../../hooks/useGameStates';
 import { PageQueryLoader } from '../PageQueryLoader/PageQueryLoader';
 import { Board } from './Board/Board';
 import { Controls } from './Controls/Controls';
 import { Details } from './Details/Details';
+import { useCurrentGameStateQuery } from './hooks/useCurrentGameStateQuery';
 
-interface GameProps {
-  puzzleString: string;
-}
-
-export function Game({ puzzleString }: GameProps) {
-  const gameStateQuery = useGameState(puzzleString);
+export function Game() {
+  const gameStateQuery = useCurrentGameStateQuery();
 
   return (
     <View className="flex flex-1 flex-col">
       <PageQueryLoader query={gameStateQuery} ignoreLoading>
-        {({ data: gameState, isLoading }) => (
+        {({ data: gameState }) => (
           <View className="flex flex-1 flex-col items-center justify-around">
             <Details gameState={gameState} />
             <Board gameState={gameState} />

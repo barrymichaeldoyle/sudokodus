@@ -5,21 +5,25 @@ import { NumberButton } from './NumberButton';
 export function NumberPad() {
   return (
     <View className="aspect-square">
-      <View className="flex-1 flex-row">
-        {[1, 2, 3].map(number => (
-          <NumberButton key={number} number={number} />
-        ))}
-      </View>
-      <View className="flex-1 flex-row">
-        {[4, 5, 6].map(number => (
-          <NumberButton key={number} number={number} />
-        ))}
-      </View>
-      <View className="flex-1 flex-row">
-        {[7, 8, 9].map(number => (
-          <NumberButton key={number} number={number} />
-        ))}
-      </View>
+      <NumberPadButtonsRow numbers={[1, 2, 3]} />
+      <NumberPadButtonsRow numbers={[4, 5, 6]} />
+      <NumberPadButtonsRow numbers={[7, 8, 9]} />
+    </View>
+  );
+}
+
+interface NumberPadButtonsRowProps {
+  numbers: number[];
+}
+
+function NumberPadButtonsRow({
+  numbers,
+}: NumberPadButtonsRowProps) {
+  return (
+    <View className="flex-1 flex-row">
+      {numbers.map(number => (
+        <NumberButton key={number} number={number} />
+      ))}
     </View>
   );
 }

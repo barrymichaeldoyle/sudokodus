@@ -4,11 +4,11 @@ import { primary, white } from '../../src/colors';
 import { Game } from '../../src/components/game/Game';
 import { ScreenContainer } from '../../src/components/ScreenContainer';
 import { usePostHogCapture } from '../../src/hooks/usePostHogCapture';
+import { GameScreenParams } from '../../src/types';
 
 export default function GameScreen() {
-  const { puzzle_string } = useLocalSearchParams<{
-    puzzle_string: string;
-  }>();
+  const { puzzle_string } =
+    useLocalSearchParams<GameScreenParams>();
   usePostHogCapture('game_opened', {
     puzzle_string,
   });
@@ -23,7 +23,7 @@ export default function GameScreen() {
           headerTintColor: white,
         }}
       />
-      <Game puzzleString={puzzle_string} />
+      <Game />
     </ScreenContainer>
   );
 }

@@ -1,8 +1,9 @@
+import type { ReactNode } from 'react';
 import { Text, View } from 'react-native';
 
 interface DetailItemProps {
   label: string;
-  value: string | number;
+  value: string | number | ReactNode;
 }
 
 export function DetailItem({
