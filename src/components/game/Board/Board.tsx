@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import {
   StyleSheet,
   useWindowDimensions,
@@ -7,6 +6,7 @@ import {
 
 import { black, primary } from '../../../colors';
 
+import { useGameStore } from '../store';
 import { Cell } from './Cell';
 
 const thinLineColor = primary[200];
@@ -16,38 +16,12 @@ const thickLineWidth = 2;
 
 export function Board() {
   const { width: screenWidth } = useWindowDimensions();
-  const [selectedCell, setSelectedCell] = useState<{
-    row: number;
-    col: number;
-  } | null>(null);
+  const selectedCell = useGameStore(
+    state => state.selectedCell
+  );
 
   const boardSize = screenWidth - 16;
   const cellSize = boardSize / 9;
-
-  function handleCellPress(row: number, col: number) {
-    setSelectedCell({ row, col });
-  }
-
-  function isRelatedCell(row: number, col: number) {
-    if (!selectedCell) {
-      return false;
-    }
-    const { row: selectedRow, col: selectedCol } =
-      selectedCell;
-    if (row === selectedRow) {
-      return true;
-    }
-    if (col === selectedCol) {
-      return true;
-    }
-    const boxRow = Math.floor(row / 3);
-    const boxCol = Math.floor(col / 3);
-    const selectedBoxRow = Math.floor(selectedRow / 3);
-    const selectedBoxCol = Math.floor(selectedCol / 3);
-    return (
-      boxRow === selectedBoxRow && boxCol === selectedBoxCol
-    );
-  }
 
   function getLineStyle(
     index: number,
@@ -96,14 +70,8 @@ export function Board() {
               <Cell
                 key={`cell-${row}-${col}`}
                 col={col}
-                isRelated={isRelatedCell(row, col)}
-                isSelected={
-                  selectedCell?.row === row &&
-                  selectedCell?.col === col
-                }
                 row={row}
                 size={cellSize}
-                onPress={handleCellPress}
               />
             ))}
           </View>
@@ -144,7 +112,7 @@ export function Board() {
           ) : null
         )}
         {Array.from({ length: 10 }, (_, i) =>
-          i % 3 === 0 ? ( // Only thick lines
+          i % 3 === 0 ? (
             <View
               key={`v-thick-line-${i}`}
               style={{

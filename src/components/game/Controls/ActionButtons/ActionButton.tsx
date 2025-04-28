@@ -11,12 +11,14 @@ import { primary } from '../../../../colors';
 import { useCurrentGameStateQuery } from '../../hooks/useCurrentGameStateQuery';
 
 interface ActionButtonProps {
+  badge?: string;
   icon: SFSymbol;
   label: string;
   onPress: () => void;
 }
 
 export function ActionButton({
+  badge,
   icon,
   label,
   onPress,
@@ -46,6 +48,13 @@ export function ActionButton({
         className="aspect-square items-center justify-center rounded-md border-2 border-primary-500 bg-white active:bg-primary-100"
       >
         <View className="flex flex-col items-center gap-1">
+          {badge && (
+            <View className="absolute -left-5 -top-4 z-10 rounded-full bg-primary-500 px-2 py-1">
+              <Text className="text-xs font-bold text-white">
+                {badge}
+              </Text>
+            </View>
+          )}
           <SymbolView
             name={icon}
             size={iconSize}

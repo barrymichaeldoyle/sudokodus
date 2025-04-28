@@ -1,8 +1,8 @@
 import { Text, TouchableOpacity, View } from 'react-native';
 import { twMerge } from 'tailwind-merge';
-import { create } from 'zustand';
 
 import { useCurrentGameStateQuery } from '../hooks/useCurrentGameStateQuery';
+import { useGameStore } from '../store';
 
 interface CellData {
   value: number | null;
@@ -10,35 +10,37 @@ interface CellData {
   notes: number[];
 }
 
-interface SelectedCellState {
-  selectedCell: { row: number; col: number } | null;
-  setSelectedCell: (row: number, col: number) => void;
-}
-
-export const useSelectedCellStore =
-  create<SelectedCellState>(set => ({
-    selectedCell: null,
-    setSelectedCell: (row, col) =>
-      set({ selectedCell: { row, col } }),
-  }));
-
 interface CellProps {
   size: number;
   row: number;
   col: number;
-  isRelated: boolean;
 }
 
-export function Cell({
-  size,
-  row,
-  col,
-  isRelated,
-}: CellProps) {
+export function Cell({ size, row, col }: CellProps) {
   const { data: gameState } = useCurrentGameStateQuery();
   const cellIndex = row * 9 + col;
-  const { selectedCell, setSelectedCell } =
-    useSelectedCellStore();
+  const { selectedCell, setSelectedCell } = useGameStore();
+
+  function isRelatedCell() {
+    if (!selectedCell) {
+      return false;
+    }
+    const { row: selectedRow, col: selectedCol } =
+      selectedCell;
+    if (row === selectedRow) {
+      return true;
+    }
+    if (col === selectedCol) {
+      return true;
+    }
+    const boxRow = Math.floor(row / 3);
+    const boxCol = Math.floor(col / 3);
+    const selectedBoxRow = Math.floor(selectedRow / 3);
+    const selectedBoxCol = Math.floor(selectedCol / 3);
+    return (
+      boxRow === selectedBoxRow && boxCol === selectedBoxCol
+    );
+  }
 
   let cell: CellData | undefined;
   try {
@@ -71,10 +73,7 @@ export function Cell({
     return (
       <View
         className={twMerge('items-center justify-center')}
-        style={{
-          width: size,
-          height: size,
-        }}
+        style={{ width: size, height: size }}
       />
     );
   }
@@ -86,7 +85,7 @@ export function Cell({
     selectedCell?.row === row && selectedCell?.col === col;
   if (isSelected) {
     bgColorClass = 'bg-primary-100';
-  } else if (isRelated) {
+  } else if (isRelatedCell()) {
     bgColorClass = 'bg-gray-100';
   }
 
