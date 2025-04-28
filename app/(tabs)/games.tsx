@@ -22,8 +22,9 @@ export default function ActiveGamesScreen() {
               renderItem={({ item }) => (
                 <GameItem game={item} />
               )}
-              contentContainerClassName="gap-2 p-4"
+              contentContainerClassName="min-h-full gap-2 p-4"
               ListEmptyComponent={ActiveGamesListEmpty}
+              className="flex-1"
             />
           </View>
         )}

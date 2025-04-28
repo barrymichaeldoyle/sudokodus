@@ -43,6 +43,7 @@ export default function RootLayout() {
                       backgroundColor: primary['500'],
                     },
                     headerTintColor: white,
+                    animation: 'slide_from_bottom',
                   }}
                 />
                 <Stack.Screen name="+not-found" />

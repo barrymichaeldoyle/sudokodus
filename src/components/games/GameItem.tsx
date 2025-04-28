@@ -1,8 +1,16 @@
 import { router } from 'expo-router';
-import { Text, TouchableOpacity, View } from 'react-native';
+import {
+  Alert,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 import { DIFFICULTY_LABELS_MAP } from '../../db/types';
-import { LocalGameStateWithPuzzle } from '../../hooks/useGameStates';
+import {
+  LocalGameStateWithPuzzle,
+  useDeleteGame,
+} from '../../hooks/useGameStates';
 import { MiniSudokuGrid } from './MiniSudokuGrid';
 
 interface GameItemProps {
@@ -10,6 +18,35 @@ interface GameItemProps {
 }
 
 export function GameItem({ game }: GameItemProps) {
+  const deleteGame = useDeleteGame();
+
+  async function handleDelete() {
+    Alert.alert(
+      'Delete Game',
+      'This game will be removed from your list. You can always start a new one!',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deleteGame.mutateAsync(game.id);
+            } catch (error) {
+              console.error(
+                'Failed to delete game:',
+                error
+              );
+            }
+          },
+        },
+      ]
+    );
+  }
+
   return (
     <TouchableOpacity
       className="group flex flex-row items-center justify-between overflow-hidden rounded-l-md rounded-r-2xl bg-white shadow-lg shadow-black/5 active:bg-gray-50"
@@ -45,6 +82,13 @@ export function GameItem({ game }: GameItemProps) {
             </Text>
           </View>
         </View>
+
+        <TouchableOpacity
+          className="mr-4 rounded-full p-2 active:bg-gray-100"
+          onPress={handleDelete}
+        >
+          <Text className="text-red-500">Delete</Text>
+        </TouchableOpacity>
       </View>
     </TouchableOpacity>
   );
