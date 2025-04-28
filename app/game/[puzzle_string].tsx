@@ -18,7 +18,7 @@ export default function GameScreen() {
     <>
       <Stack.Screen
         options={{
-          title: 'SudokoduS',
+          title: 'SUDOKODUS',
           headerBackTitle: 'Back',
           headerStyle: { backgroundColor: primary['500'] },
           headerTintColor: white,

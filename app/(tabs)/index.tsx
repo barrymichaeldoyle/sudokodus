@@ -9,7 +9,7 @@ import { ScreenContainer } from '../../src/components/ScreenContainer';
 export default function HomeScreen() {
   return (
     <ScreenContainer>
-      <Stack.Screen options={{ title: 'SudokoduS' }} />
+      <Stack.Screen options={{ title: 'SUDOKODUS' }} />
       <View className="flex flex-1 justify-between gap-2 px-4 py-16">
         <View className="flex flex-col items-center justify-center">
           <View className="flex w-2/3 flex-col items-center justify-center gap-4 rounded-3xl bg-white py-16 shadow-custom">
