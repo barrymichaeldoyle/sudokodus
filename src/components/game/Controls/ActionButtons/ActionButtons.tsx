@@ -1,10 +1,15 @@
 import { View } from 'react-native';
 
-import { useState } from 'react';
+import { useGameStore } from '../../store';
 import { ActionButton } from './ActionButton';
 
 export function ActionButtons() {
-  const [isNotesOn, setIsNotesOn] = useState(false);
+  const isNotesMode = useGameStore(
+    state => state.isNotesMode
+  );
+  const toggleNotesMode = useGameStore(
+    state => state.toggleNotesMode
+  );
 
   return (
     <View className="aspect-square p-[10%]">
@@ -27,10 +32,10 @@ export function ActionButtons() {
           onPress={() => console.log('hint')}
         />
         <ActionButton
-          badge={isNotesOn ? 'on' : 'off'}
+          badge={isNotesMode ? 'on' : 'off'}
           icon="pencil"
           label="Notes"
-          onPress={() => setIsNotesOn(prev => !prev)}
+          onPress={toggleNotesMode}
         />
       </View>
     </View>

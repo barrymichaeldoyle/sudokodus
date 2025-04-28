@@ -1,7 +1,6 @@
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 
 import { View } from 'react-native';
-import { primary, white } from '../../src/colors';
 import { Game } from '../../src/components/game/Game';
 import { ScreenContainer } from '../../src/components/ScreenContainer';
 import { usePostHogCapture } from '../../src/hooks/usePostHogCapture';
@@ -15,21 +14,16 @@ export default function GameScreen() {
   });
 
   return (
-    <>
-      <Stack.Screen
-        options={{
-          title: 'SUDOKODUS',
-          headerBackTitle: 'Back',
-          headerStyle: { backgroundColor: primary['500'] },
-          headerTintColor: white,
-        }}
-      />
-      <ScreenContainer>
-        <View className="flex flex-1 flex-col items-center justify-around">
-          <Game />
-          <View className="h-24 w-full bg-primary-500" />
-        </View>
-      </ScreenContainer>
-    </>
+    <ScreenContainer>
+      <View className="flex h-full flex-col items-center justify-around">
+        <Game />
+        {/**
+         * Height here matches the tab bar height
+         * might need a more robust solution for
+         * different screen sizes
+         **/}
+        <View className="h-[82px] w-full bg-primary-500" />
+      </View>
+    </ScreenContainer>
   );
 }

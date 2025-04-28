@@ -325,3 +325,73 @@ async function saveGameState(
     ]
   );
 }
+
+export function useUpdateCell() {
+  const db = useSQLiteContext();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      puzzleString,
+      row,
+      col,
+      value,
+      isNotesMode,
+    }: {
+      puzzleString: string;
+      row: number;
+      col: number;
+      value: number | null;
+      isNotesMode: boolean;
+    }) => {
+      const gameState =
+        await db.getFirstAsync<LocalGameState>(
+          'SELECT * FROM game_states WHERE puzzle_string = ?',
+          [puzzleString]
+        );
+
+      if (!gameState) {
+        throw new Error('Game state not found');
+      }
+
+      const currentState =
+        typeof gameState.current_state === 'string'
+          ? JSON.parse(gameState.current_state)
+          : gameState.current_state;
+
+      const cellIndex = row * 9 + col;
+      const cell = currentState[cellIndex];
+
+      if (isNotesMode) {
+        // Toggle the note
+        const notes = cell.notes || [];
+        const noteIndex = notes.indexOf(value);
+        if (noteIndex === -1) {
+          notes.push(value);
+        } else {
+          notes.splice(noteIndex, 1);
+        }
+        cell.notes = notes;
+      } else {
+        // Set the value
+        cell.value = value;
+        // Clear notes when setting a value
+        cell.notes = [];
+      }
+
+      await db.runAsync(
+        'UPDATE game_states SET current_state = ? WHERE puzzle_string = ?',
+        [JSON.stringify(currentState), puzzleString]
+      );
+
+      return currentState;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: getGameStateQueryKey(
+          variables.puzzleString
+        ),
+      });
+    },
+  });
+}

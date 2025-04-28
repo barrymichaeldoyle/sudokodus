@@ -9,6 +9,7 @@ import { StatusBar } from 'expo-status-bar';
 import { PostHogProvider } from 'posthog-react-native';
 
 import '../global.css';
+import { primary, white } from '../src/colors';
 import { config } from '../src/config';
 import { DatabaseProvider } from '../src/db/DatabaseProvider';
 import { NetworkSyncManager } from '../src/NetworkSyncManager/NetworkSyncManager';
@@ -32,6 +33,17 @@ export default function RootLayout() {
                 <Stack.Screen
                   name="(tabs)"
                   options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="game/[puzzle_string]"
+                  options={{
+                    title: 'SUDOKODUS',
+                    headerBackTitle: 'Back',
+                    headerStyle: {
+                      backgroundColor: primary['500'],
+                    },
+                    headerTintColor: white,
+                  }}
                 />
                 <Stack.Screen name="+not-found" />
               </Stack>
