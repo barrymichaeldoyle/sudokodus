@@ -189,13 +189,11 @@ export function useCreateGame(): UseMutationResult<
 
       const initialState = [];
       for (let i = 0; i < 81; i++) {
-        const value =
-          puzzleString[i] === '.'
-            ? null
-            : parseInt(puzzleString[i]);
+        const char = puzzleString[i];
+        const value = char === '0' ? null : parseInt(char);
         initialState.push({
           value,
-          isGiven: value !== null,
+          isGiven: char !== '0',
           notes: [],
         });
       }
@@ -361,6 +359,11 @@ export function useUpdateCell() {
 
       const cellIndex = row * 9 + col;
       const cell = currentState[cellIndex];
+
+      // Don't allow updates to given cells (cells that were part of the original puzzle)
+      if (cell.isGiven) {
+        throw new Error('Cannot update given cells');
+      }
 
       if (isNotesMode) {
         // Toggle the note

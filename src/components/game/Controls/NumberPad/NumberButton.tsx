@@ -6,7 +6,9 @@ import {
   View,
 } from 'react-native';
 
+import { useUpdateCell } from '../../../../hooks/useGameStates';
 import { useCurrentGameStateQuery } from '../../hooks/useCurrentGameStateQuery';
+import { useGameStore } from '../../store';
 
 interface NumberButtonProps {
   number: number;
@@ -15,8 +17,10 @@ interface NumberButtonProps {
 export function NumberButton({
   number,
 }: NumberButtonProps) {
-  const { isLoading } = useCurrentGameStateQuery();
   const [size, setSize] = useState(24);
+  const { data: gameState } = useCurrentGameStateQuery();
+  const { selectedCell, isNotesMode } = useGameStore();
+  const updateCell = useUpdateCell();
 
   function handleLayout(e: LayoutChangeEvent) {
     const size = Math.min(
@@ -26,11 +30,23 @@ export function NumberButton({
     setSize(size * 0.4);
   }
 
+  function handlePress() {
+    if (!selectedCell || !gameState?.puzzle_string) return;
+
+    updateCell.mutate({
+      puzzleString: gameState.puzzle_string,
+      row: selectedCell.row,
+      col: selectedCell.col,
+      value: number,
+      isNotesMode,
+    });
+  }
+
   return (
     <View className="flex-1 p-1">
       <TouchableOpacity
-        disabled={isLoading}
-        onPress={() => console.log(number, 'pressed')}
+        disabled={!selectedCell}
+        onPress={handlePress}
         onLayout={handleLayout}
         className="aspect-square items-center justify-center rounded-full border-2 border-primary-500 bg-white active:bg-primary-100"
       >

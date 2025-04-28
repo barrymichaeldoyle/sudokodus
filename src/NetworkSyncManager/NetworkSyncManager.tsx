@@ -45,7 +45,9 @@ export function NetworkSyncManager({
     setPuzzleCountsSufficient,
   ] = useState(false);
   const lastPuzzleSyncAttempt = useRef<number>(0);
+  const lastDailyChallengeSyncAttempt = useRef<number>(0);
   const PUZZLE_SYNC_COOLDOWN = 5 * 60 * 1000; // 5 minutes cooldown
+  const DAILY_CHALLENGE_SYNC_COOLDOWN = 5 * 60 * 1000; // 5 minutes cooldown
 
   const checkSupabaseClient = useCallback(async () => {
     if (!isMounted.current) return false;
@@ -156,8 +158,22 @@ export function NetworkSyncManager({
 
       if (!isMounted.current) return;
 
-      // Always sync daily challenges
-      await syncDailyChallengesFromSupabase();
+      // Only sync daily challenges if cooldown has passed
+      if (
+        now - lastDailyChallengeSyncAttempt.current >
+        DAILY_CHALLENGE_SYNC_COOLDOWN
+      ) {
+        lastDailyChallengeSyncAttempt.current = now;
+        try {
+          await syncDailyChallengesFromSupabase();
+        } catch (error) {
+          console.error(
+            'Daily challenge sync failed:',
+            error
+          );
+          // Don't throw the error, just log it and continue
+        }
+      }
 
       if (!isMounted.current) return;
 
