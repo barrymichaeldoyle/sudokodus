@@ -11,7 +11,7 @@ export function DetailItem({
   value,
 }: DetailItemProps) {
   return (
-    <View className="flex flex-row items-center gap-1">
+    <View className="flex flex-1 flex-row justify-center gap-1">
       <Text className="font-bold">{label}:</Text>
       <Text>{value}</Text>
     </View>

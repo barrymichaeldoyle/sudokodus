@@ -100,9 +100,11 @@ export function Cell({ size, row, col }: CellProps) {
     >
       {value !== null && value !== 0 ? (
         <Text
-          className={`text-xl font-bold ${
-            isGiven ? 'text-black' : 'text-blue-600'
-          }`}
+          className={twMerge(
+            'font-bold',
+            isGiven ? 'text-black' : 'text-primary-500'
+          )}
+          style={{ fontSize: size * 0.55 }}
         >
           {value}
         </Text>
