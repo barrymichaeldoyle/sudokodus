@@ -13,7 +13,7 @@ export default function ActiveGamesScreen() {
     <ScreenContainer>
       <PageQueryLoader query={activeGamesQuery}>
         {({ data: activeGames }) => (
-          <View className="flex flex-1">
+          <View className="flex-1">
             <FlatList
               data={activeGames}
               keyExtractor={item =>
@@ -22,7 +22,7 @@ export default function ActiveGamesScreen() {
               renderItem={({ item }) => (
                 <GameItem game={item} />
               )}
-              contentContainerClassName="flex-1 gap-2 p-4"
+              contentContainerClassName="gap-2 p-4"
               ListEmptyComponent={ActiveGamesListEmpty}
             />
           </View>
