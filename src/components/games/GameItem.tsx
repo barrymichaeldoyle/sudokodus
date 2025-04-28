@@ -6,6 +6,7 @@ import {
   View,
 } from 'react-native';
 
+import { SymbolView } from 'expo-symbols';
 import { DIFFICULTY_LABELS_MAP } from '../../db/types';
 import {
   LocalGameStateWithPuzzle,
@@ -84,10 +85,14 @@ export function GameItem({ game }: GameItemProps) {
         </View>
 
         <TouchableOpacity
-          className="mr-4 rounded-full p-2 active:bg-gray-100"
+          className="mr-4 rounded-full p-2"
           onPress={handleDelete}
         >
-          <Text className="text-red-500">Delete</Text>
+          <SymbolView
+            name="trash"
+            size={20}
+            tintColor="#EF4444"
+          />
         </TouchableOpacity>
       </View>
     </TouchableOpacity>
