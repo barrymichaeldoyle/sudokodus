@@ -1,7 +1,7 @@
 import { View } from 'react-native';
 
 import { BoardLines } from './BoardLines';
-import { Cell } from './Cell';
+import { Cell } from './Cell/Cell';
 import { useBoardDimensions } from './useBoardDimensions';
 
 export function Board() {

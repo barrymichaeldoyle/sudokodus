@@ -1,31 +1,36 @@
+import { useMemo } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { twMerge } from 'tailwind-merge';
 
-import { useCurrentGameStateQuery } from '../hooks/useCurrentGameStateQuery';
-import { useGameStore } from '../store';
-import { useBoardDimensions } from './useBoardDimensions';
+import { useGameStore } from '../../store';
+import { useBoardDimensions } from '../useBoardDimensions';
+import { CellData } from './types';
 
-interface CellData {
-  value: number | null;
-  isGiven: boolean;
-  notes: number[];
-}
-
-interface CellProps {
+interface DefinedCellProps {
+  cell: CellData;
   row: number;
   col: number;
 }
 
-export function Cell({ row, col }: CellProps) {
-  const { data: gameState } = useCurrentGameStateQuery();
-  const cellIndex = row * 9 + col;
-  const { selectedCell, setSelectedCell } = useGameStore();
+export function DefinedCell({
+  cell,
+  row,
+  col,
+}: DefinedCellProps) {
+  const { value, isGiven, notes } = cell;
   const { cellSize } = useBoardDimensions();
+  const selectedCell = useGameStore(
+    state => state.selectedCell
+  );
+  const setSelectedCell = useGameStore(
+    state => state.setSelectedCell
+  );
 
-  function isRelatedCell() {
+  const isRelatedCell = useMemo(() => {
     if (!selectedCell) {
       return false;
     }
+
     const { row: selectedRow, col: selectedCol } =
       selectedCell;
     if (row === selectedRow) {
@@ -34,58 +39,29 @@ export function Cell({ row, col }: CellProps) {
     if (col === selectedCol) {
       return true;
     }
+
     const boxRow = Math.floor(row / 3);
     const boxCol = Math.floor(col / 3);
     const selectedBoxRow = Math.floor(selectedRow / 3);
     const selectedBoxCol = Math.floor(selectedCol / 3);
+
     return (
       boxRow === selectedBoxRow && boxCol === selectedBoxCol
     );
-  }
+  }, [selectedCell, row, col]);
 
-  let cell: CellData | undefined;
-  try {
-    if (!gameState?.current_state) {
-      return (
-        <View
-          className={twMerge('items-center justify-center')}
-          style={{ width: cellSize, height: cellSize }}
-        />
-      );
+  const bgColorClass = useMemo(() => {
+    const isSelected =
+      selectedCell?.row === row &&
+      selectedCell?.col === col;
+    if (isSelected) {
+      return 'bg-primary-100';
     }
-
-    const currentState =
-      typeof gameState.current_state === 'string'
-        ? JSON.parse(gameState.current_state)
-        : gameState.current_state;
-
-    cell = (currentState as unknown as CellData[])[
-      cellIndex
-    ];
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('Error parsing game state:', error);
-  }
-
-  if (!cell) {
-    return (
-      <View
-        className={twMerge('items-center justify-center')}
-        style={{ width: cellSize, height: cellSize }}
-      />
-    );
-  }
-
-  const { value, isGiven, notes } = cell;
-
-  let bgColorClass = 'bg-white';
-  const isSelected =
-    selectedCell?.row === row && selectedCell?.col === col;
-  if (isSelected) {
-    bgColorClass = 'bg-primary-100';
-  } else if (isRelatedCell()) {
-    bgColorClass = 'bg-gray-100';
-  }
+    if (isRelatedCell) {
+      return 'bg-gray-100';
+    }
+    return 'bg-white';
+  }, [selectedCell, row, col, isRelatedCell]);
 
   return (
     <TouchableOpacity
