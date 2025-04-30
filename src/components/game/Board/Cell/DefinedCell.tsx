@@ -1,5 +1,10 @@
-import { useMemo } from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { useEffect, useMemo, useRef } from 'react';
+import {
+  Animated,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { twMerge } from 'tailwind-merge';
 
 import { useGameStore } from '../../store';
@@ -25,6 +30,30 @@ export function DefinedCell({
   const setSelectedCell = useGameStore(
     state => state.setSelectedCell
   );
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const prevValue = useRef(value);
+
+  useEffect(() => {
+    if (
+      prevValue.current !== value &&
+      value !== null &&
+      value !== 0
+    ) {
+      Animated.sequence([
+        Animated.timing(scaleAnim, {
+          toValue: 1.2,
+          duration: 100,
+          useNativeDriver: true,
+        }),
+        Animated.timing(scaleAnim, {
+          toValue: 1,
+          duration: 100,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+    prevValue.current = value;
+  }, [value, scaleAnim]);
 
   const isRelatedCell = useMemo(() => {
     if (!selectedCell) {
@@ -73,15 +102,18 @@ export function DefinedCell({
       onPress={() => setSelectedCell(row, col)}
     >
       {value !== null && value !== 0 ? (
-        <Text
+        <Animated.Text
           className={twMerge(
             'font-bold',
             isGiven ? 'text-black' : 'text-primary-500'
           )}
-          style={{ fontSize: cellSize * 0.55 }}
+          style={{
+            fontSize: cellSize * 0.55,
+            transform: [{ scale: scaleAnim }],
+          }}
         >
           {value}
-        </Text>
+        </Animated.Text>
       ) : (
         <View className="h-full w-full flex-row flex-wrap p-0.5">
           {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
