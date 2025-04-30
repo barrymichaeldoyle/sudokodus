@@ -31,7 +31,9 @@ export function NumberButton({
   }
 
   function handlePress() {
-    if (!selectedCell || !gameState?.puzzle_string) return;
+    if (!selectedCell || !gameState?.puzzle_string) {
+      return;
+    }
 
     updateCell.mutate({
       puzzleString: gameState.puzzle_string,
