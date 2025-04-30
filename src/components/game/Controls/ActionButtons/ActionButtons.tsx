@@ -1,7 +1,7 @@
 import { View } from 'react-native';
 
 import { useGameStore } from '../../store';
-import { useHandleUpdate } from '../hooks/useHandleUpdate';
+import { useHandleUpdateCell } from '../hooks/useHandleUpdateCell';
 import { ActionButton } from './ActionButton';
 
 export function ActionButtons() {
@@ -11,7 +11,7 @@ export function ActionButtons() {
   const toggleNotesMode = useGameStore(
     state => state.toggleNotesMode
   );
-  const handleUpdate = useHandleUpdate();
+  const handleUpdate = useHandleUpdateCell();
 
   function handleErasePress() {
     handleUpdate(0);

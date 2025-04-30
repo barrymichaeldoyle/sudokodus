@@ -2,7 +2,7 @@ import { useUpdateCell } from '../../../../hooks/useGameStates';
 import { useCurrentGameStateQuery } from '../../hooks/useCurrentGameStateQuery';
 import { useGameStore } from '../../store';
 
-export function useHandleUpdate() {
+export function useHandleUpdateCell() {
   const { data: gameState } = useCurrentGameStateQuery();
   const selectedCell = useGameStore(
     state => state.selectedCell

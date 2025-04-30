@@ -7,7 +7,7 @@ import {
 } from 'react-native';
 
 import { useGameStore } from '../../store';
-import { useHandleUpdate } from '../hooks/useHandleUpdate';
+import { useHandleUpdateCell } from '../hooks/useHandleUpdateCell';
 
 interface NumberButtonProps {
   num: number;
@@ -15,7 +15,7 @@ interface NumberButtonProps {
 
 export function NumberButton({ num }: NumberButtonProps) {
   const [size, setSize] = useState(24);
-  const handleUpdate = useHandleUpdate();
+  const handleUpdate = useHandleUpdateCell();
   const selectedCell = useGameStore(
     state => state.selectedCell
   );
