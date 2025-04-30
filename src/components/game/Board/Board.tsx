@@ -1,62 +1,11 @@
-import {
-  StyleSheet,
-  useWindowDimensions,
-  View,
-} from 'react-native';
+import { View } from 'react-native';
 
-import { black, primary } from '../../../colors';
-
-import { useGameStore } from '../store';
+import { BoardLines } from './BoardLines';
 import { Cell } from './Cell';
-
-const thinLineColor = primary[200];
-const thickLineColor = black;
-const thinLineWidth = StyleSheet.hairlineWidth;
-const thickLineWidth = 2;
+import { useBoardDimensions } from './useBoardDimensions';
 
 export function Board() {
-  const { width: screenWidth } = useWindowDimensions();
-  const selectedCell = useGameStore(
-    state => state.selectedCell
-  );
-
-  const boardSize = screenWidth - 16;
-  const cellSize = boardSize / 9;
-
-  function getLineStyle(
-    index: number,
-    orientation: 'horizontal' | 'vertical'
-  ) {
-    const isThick = index % 3 === 0;
-    const thickness = isThick
-      ? thickLineWidth
-      : thinLineWidth;
-    const color = isThick ? thickLineColor : thinLineColor;
-    const position =
-      index * cellSize - (isThick ? thickness / 2 : 0);
-
-    const baseStyle = {
-      position: 'absolute' as const,
-      backgroundColor: color,
-    };
-
-    if (orientation === 'horizontal') {
-      return {
-        ...baseStyle,
-        top: position,
-        left: -thickLineWidth / 2,
-        width: boardSize + thickLineWidth,
-        height: thickness,
-      };
-    }
-    return {
-      ...baseStyle,
-      top: -thickLineWidth / 2,
-      left: position,
-      width: thickness,
-      height: boardSize + thickLineWidth,
-    };
-  }
+  const { boardSize } = useBoardDimensions();
 
   return (
     <View className="flex flex-col items-center">
@@ -71,57 +20,12 @@ export function Board() {
                 key={`cell-${row}-${col}`}
                 col={col}
                 row={row}
-                size={cellSize}
               />
             ))}
           </View>
         ))}
 
-        {Array.from({ length: 10 }, (_, i) =>
-          i % 3 !== 0 ? (
-            <View
-              key={`h-thin-line-${i}`}
-              style={{
-                ...getLineStyle(i, 'horizontal'),
-                zIndex: 1,
-              }}
-            />
-          ) : null
-        )}
-        {Array.from({ length: 10 }, (_, i) =>
-          i % 3 !== 0 ? (
-            <View
-              key={`v-thin-line-${i}`}
-              style={{
-                ...getLineStyle(i, 'vertical'),
-                zIndex: 1,
-              }}
-            />
-          ) : null
-        )}
-
-        {Array.from({ length: 10 }, (_, i) =>
-          i % 3 === 0 ? (
-            <View
-              key={`h-thick-line-${i}`}
-              style={{
-                ...getLineStyle(i, 'horizontal'),
-                zIndex: 2,
-              }}
-            />
-          ) : null
-        )}
-        {Array.from({ length: 10 }, (_, i) =>
-          i % 3 === 0 ? (
-            <View
-              key={`v-thick-line-${i}`}
-              style={{
-                ...getLineStyle(i, 'vertical'),
-                zIndex: 2,
-              }}
-            />
-          ) : null
-        )}
+        <BoardLines />
       </View>
     </View>
   );

@@ -3,6 +3,7 @@ import { twMerge } from 'tailwind-merge';
 
 import { useCurrentGameStateQuery } from '../hooks/useCurrentGameStateQuery';
 import { useGameStore } from '../store';
+import { useBoardDimensions } from './useBoardDimensions';
 
 interface CellData {
   value: number | null;
@@ -11,15 +12,15 @@ interface CellData {
 }
 
 interface CellProps {
-  size: number;
   row: number;
   col: number;
 }
 
-export function Cell({ size, row, col }: CellProps) {
+export function Cell({ row, col }: CellProps) {
   const { data: gameState } = useCurrentGameStateQuery();
   const cellIndex = row * 9 + col;
   const { selectedCell, setSelectedCell } = useGameStore();
+  const { cellSize } = useBoardDimensions();
 
   function isRelatedCell() {
     if (!selectedCell) {
@@ -48,10 +49,7 @@ export function Cell({ size, row, col }: CellProps) {
       return (
         <View
           className={twMerge('items-center justify-center')}
-          style={{
-            width: size,
-            height: size,
-          }}
+          style={{ width: cellSize, height: cellSize }}
         />
       );
     }
@@ -73,7 +71,7 @@ export function Cell({ size, row, col }: CellProps) {
     return (
       <View
         className={twMerge('items-center justify-center')}
-        style={{ width: size, height: size }}
+        style={{ width: cellSize, height: cellSize }}
       />
     );
   }
@@ -95,7 +93,7 @@ export function Cell({ size, row, col }: CellProps) {
         'items-center justify-center',
         bgColorClass
       )}
-      style={{ width: size, height: size }}
+      style={{ width: cellSize, height: cellSize }}
       onPress={() => setSelectedCell(row, col)}
     >
       {value !== null && value !== 0 ? (
@@ -104,7 +102,7 @@ export function Cell({ size, row, col }: CellProps) {
             'font-bold',
             isGiven ? 'text-black' : 'text-primary-500'
           )}
-          style={{ fontSize: size * 0.55 }}
+          style={{ fontSize: cellSize * 0.55 }}
         >
           {value}
         </Text>
