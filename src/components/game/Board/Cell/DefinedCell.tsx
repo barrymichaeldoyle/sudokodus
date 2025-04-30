@@ -1,4 +1,9 @@
-import { useEffect, useMemo, useRef } from 'react';
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   Animated,
   Text,
@@ -23,37 +28,69 @@ export function DefinedCell({
   col,
 }: DefinedCellProps) {
   const { value, isGiven, notes } = cell;
+
   const { cellSize } = useBoardDimensions();
+
   const selectedCell = useGameStore(
     state => state.selectedCell
   );
   const setSelectedCell = useGameStore(
     state => state.setSelectedCell
   );
+
   const scaleAnim = useRef(new Animated.Value(1)).current;
+  const opacityAnim = useRef(new Animated.Value(1)).current;
   const prevValue = useRef(value);
+  const [showText, setShowText] = useState(
+    value !== null && value !== 0
+  );
+  const [displayValue, setDisplayValue] = useState(value);
 
   useEffect(() => {
-    if (
-      prevValue.current !== value &&
-      value !== null &&
-      value !== 0
-    ) {
-      Animated.sequence([
-        Animated.timing(scaleAnim, {
-          toValue: 1.2,
-          duration: 100,
-          useNativeDriver: true,
-        }),
-        Animated.timing(scaleAnim, {
-          toValue: 1,
-          duration: 100,
-          useNativeDriver: true,
-        }),
-      ]).start();
+    if (prevValue.current !== value) {
+      if (value === 0 || value === null) {
+        // Fade out animation
+        Animated.parallel([
+          Animated.timing(scaleAnim, {
+            toValue: 0.8,
+            duration: 100,
+            useNativeDriver: true,
+          }),
+          Animated.timing(opacityAnim, {
+            toValue: 0,
+            duration: 100,
+            useNativeDriver: true,
+          }),
+        ]).start(() => {
+          setShowText(false);
+        });
+      } else {
+        setShowText(true);
+        setDisplayValue(value);
+        // Bounce in animation
+        Animated.parallel([
+          Animated.sequence([
+            Animated.timing(scaleAnim, {
+              toValue: 1.2,
+              duration: 100,
+              useNativeDriver: true,
+            }),
+            Animated.timing(scaleAnim, {
+              toValue: 1,
+              duration: 100,
+              useNativeDriver: true,
+            }),
+          ]),
+          Animated.timing(opacityAnim, {
+            toValue: 1,
+            duration: 200,
+            useNativeDriver: true,
+          }),
+        ]).start();
+      }
     }
     prevValue.current = value;
-  }, [value, scaleAnim]);
+  }, [value, scaleAnim, opacityAnim]);
 
   const isRelatedCell = useMemo(() => {
     if (!selectedCell) {
@@ -101,7 +138,7 @@ export function DefinedCell({
       style={{ width: cellSize, height: cellSize }}
       onPress={() => setSelectedCell(row, col)}
     >
-      {value !== null && value !== 0 ? (
+      {showText ? (
         <Animated.Text
           className={twMerge(
             'font-bold',
@@ -110,9 +147,10 @@ export function DefinedCell({
           style={{
             fontSize: cellSize * 0.55,
             transform: [{ scale: scaleAnim }],
+            opacity: opacityAnim,
           }}
         >
-          {value}
+          {displayValue}
         </Animated.Text>
       ) : (
         <View className="h-full w-full flex-row flex-wrap p-0.5">
