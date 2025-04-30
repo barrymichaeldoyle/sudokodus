@@ -1,8 +1,7 @@
 import { View } from 'react-native';
 
-import { useUpdateCell } from '../../../../hooks/useGameStates';
-import { useCurrentGameStateQuery } from '../../hooks/useCurrentGameStateQuery';
 import { useGameStore } from '../../store';
+import { useHandleUpdate } from '../hooks/useHandleUpdate';
 import { ActionButton } from './ActionButton';
 
 export function ActionButtons() {
@@ -12,22 +11,10 @@ export function ActionButtons() {
   const toggleNotesMode = useGameStore(
     state => state.toggleNotesMode
   );
-  const { data: gameState } = useCurrentGameStateQuery();
-  const { selectedCell } = useGameStore();
-  const updateCell = useUpdateCell();
+  const handleUpdate = useHandleUpdate();
 
   function handleErasePress() {
-    if (!selectedCell || !gameState?.puzzle_string) {
-      return;
-    }
-
-    updateCell.mutate({
-      puzzleString: gameState.puzzle_string,
-      row: selectedCell.row,
-      col: selectedCell.col,
-      value: 0,
-      isNotesMode,
-    });
+    handleUpdate(0);
   }
 
   return (

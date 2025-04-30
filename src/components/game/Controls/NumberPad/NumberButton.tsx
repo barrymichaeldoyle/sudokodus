@@ -6,21 +6,19 @@ import {
   View,
 } from 'react-native';
 
-import { useUpdateCell } from '../../../../hooks/useGameStates';
-import { useCurrentGameStateQuery } from '../../hooks/useCurrentGameStateQuery';
 import { useGameStore } from '../../store';
+import { useHandleUpdate } from '../hooks/useHandleUpdate';
 
 interface NumberButtonProps {
-  number: number;
+  num: number;
 }
 
-export function NumberButton({
-  number,
-}: NumberButtonProps) {
+export function NumberButton({ num }: NumberButtonProps) {
   const [size, setSize] = useState(24);
-  const { data: gameState } = useCurrentGameStateQuery();
-  const { selectedCell, isNotesMode } = useGameStore();
-  const updateCell = useUpdateCell();
+  const handleUpdate = useHandleUpdate();
+  const selectedCell = useGameStore(
+    state => state.selectedCell
+  );
 
   function handleLayout(e: LayoutChangeEvent) {
     const size = Math.min(
@@ -31,17 +29,7 @@ export function NumberButton({
   }
 
   function handlePress() {
-    if (!selectedCell || !gameState?.puzzle_string) {
-      return;
-    }
-
-    updateCell.mutate({
-      puzzleString: gameState.puzzle_string,
-      row: selectedCell.row,
-      col: selectedCell.col,
-      value: number,
-      isNotesMode,
-    });
+    handleUpdate(num);
   }
 
   return (
@@ -56,7 +44,7 @@ export function NumberButton({
           className="font-bold text-primary-500"
           style={{ fontSize: size }}
         >
-          {number}
+          {num}
         </Text>
       </TouchableOpacity>
     </View>
