@@ -14,11 +14,15 @@ interface NumberButtonProps {
 }
 
 export function NumberButton({ num }: NumberButtonProps) {
-  const [size, setSize] = useState(24);
   const handleUpdate = useHandleUpdateCell();
   const selectedCell = useGameStore(
     state => state.selectedCell
   );
+  const isNotesMode = useGameStore(
+    state => state.isNotesMode
+  );
+
+  const [size, setSize] = useState(24);
 
   function handleLayout(e: LayoutChangeEvent) {
     const size = Math.min(
@@ -29,7 +33,7 @@ export function NumberButton({ num }: NumberButtonProps) {
   }
 
   function handlePress() {
-    handleUpdate(num);
+    handleUpdate(num, isNotesMode);
   }
 
   return (
