@@ -1,11 +1,7 @@
 import { useLocalSearchParams } from 'expo-router';
-
 import { View } from 'react-native';
-import {
-  BannerAd,
-  BannerAdSize,
-  TestIds,
-} from 'react-native-google-mobile-ads';
+
+import { BannerAd } from '../../src/components/BannerAd/BannerAd';
 import { Game } from '../../src/components/game/Game';
 import { ScreenContainer } from '../../src/components/ScreenContainer';
 import { usePostHogCapture } from '../../src/hooks/usePostHogCapture';
@@ -20,14 +16,11 @@ export default function GameScreen() {
 
   return (
     <ScreenContainer>
-      <View className="flex h-full flex-col items-center justify-around">
-        <View className="h-[58px] w-full bg-primary-500">
-          <BannerAd
-            unitId={TestIds.BANNER}
-            size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-          />
+      <View className="flex h-full flex-1 flex-col items-center justify-between">
+        <BannerAd />
+        <View className="flex-1">
+          <Game />
         </View>
-        <Game />
         {/**
          * Height here matches the tab bar height
          * might need a more robust solution for

@@ -7,22 +7,14 @@ import 'expo-dev-client';
 import { Link, Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SymbolView } from 'expo-symbols';
-import {
-  getTrackingPermissionsAsync,
-  PermissionStatus,
-  requestTrackingPermissionsAsync,
-} from 'expo-tracking-transparency';
 import { verifyInstallation } from 'nativewind';
 import { PostHogProvider } from 'posthog-react-native';
-import { useEffect } from 'react';
-import mobileAds, {
-  MaxAdContentRating,
-} from 'react-native-google-mobile-ads';
 
 import '../global.css';
 import { primary, white } from '../src/colors';
 import { config } from '../src/config';
 import { DatabaseProvider } from '../src/db/DatabaseProvider';
+import { useSetupAdMob } from '../src/hooks/useSetupAdMob/useSetupAdMob';
 import { NetworkSyncManager } from '../src/NetworkSyncManager/NetworkSyncManager';
 import { createMMKVStorage } from '../src/utils/createMMKVStorage';
 
@@ -35,34 +27,7 @@ const posthogStorage = createMMKVStorage(
 
 export default function RootLayout() {
   verifyInstallation();
-
-  useEffect(() => {
-    async function initializeServices() {
-      const { status } =
-        await getTrackingPermissionsAsync();
-      if (status === PermissionStatus.UNDETERMINED) {
-        await requestTrackingPermissionsAsync();
-      }
-
-      await mobileAds().initialize();
-      mobileAds().setRequestConfiguration({
-        // Update all future requests suitable for parental guidance
-        maxAdContentRating: MaxAdContentRating.PG,
-
-        // Indicates that you want your content treated as child-directed for purposes of COPPA.
-        tagForChildDirectedTreatment: true,
-
-        // Indicates that you want the ad request to be handled in a
-        // manner suitable for users under the age of consent.
-        tagForUnderAgeOfConsent: true,
-
-        // An array of test device IDs to allow.
-        testDeviceIdentifiers: ['EMULATOR'],
-      });
-    }
-
-    initializeServices();
-  }, []);
+  useSetupAdMob();
 
   return (
     <PostHogProvider
