@@ -4,7 +4,7 @@ import { NumberButton } from './NumberButton';
 
 export function NumberPad() {
   return (
-    <View className="aspect-square">
+    <View className="aspect-square pb-1">
       <NumberPadButtonsRow nums={[1, 2, 3]} />
       <NumberPadButtonsRow nums={[4, 5, 6]} />
       <NumberPadButtonsRow nums={[7, 8, 9]} />

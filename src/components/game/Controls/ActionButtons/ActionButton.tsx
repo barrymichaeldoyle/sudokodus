@@ -38,7 +38,7 @@ export function ActionButton({
     <View className="flex-1 p-2">
       <TouchableOpacity
         disabled={isLoading}
-        onPress={onPress}
+        onPressIn={onPress}
         onLayout={handleLayout}
         className="aspect-square items-center justify-center rounded-md border-2 border-primary-500 bg-white active:bg-primary-100"
       >
