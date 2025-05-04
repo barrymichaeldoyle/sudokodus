@@ -1,4 +1,3 @@
-// src/stores/appStore.ts
 import NetInfo, {
   NetInfoState,
 } from '@react-native-community/netinfo';
