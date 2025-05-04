@@ -4,15 +4,12 @@ import {
   useRef,
   useState,
 } from 'react';
-import {
-  Animated,
-  Text,
-  TouchableOpacity,
-} from 'react-native';
+import { Animated, TouchableOpacity } from 'react-native';
 import { twMerge } from 'tailwind-merge';
 
 import { useGameStore } from '../../store';
 import { useBoardDimensions } from '../useBoardDimensions';
+import { Note } from './Note';
 import { CellData } from './types';
 
 interface DefinedCellProps {
@@ -39,14 +36,7 @@ export function DefinedCell({
 
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const opacityAnim = useRef(new Animated.Value(1)).current;
-  const notesScaleAnim = useRef(
-    new Animated.Value(1)
-  ).current;
-  const notesOpacityAnim = useRef(
-    new Animated.Value(1)
-  ).current;
   const prevValue = useRef(value);
-  const prevNotes = useRef(notes);
   const [showText, setShowText] = useState(
     value !== null && value !== 0
   );
@@ -97,42 +87,6 @@ export function DefinedCell({
     }
     prevValue.current = value;
   }, [value, scaleAnim, opacityAnim]);
-
-  useEffect(() => {
-    if (
-      JSON.stringify(prevNotes.current) !==
-      JSON.stringify(notes)
-    ) {
-      // Animate notes changes
-      Animated.sequence([
-        Animated.parallel([
-          Animated.timing(notesScaleAnim, {
-            toValue: 0.8,
-            duration: 100,
-            useNativeDriver: true,
-          }),
-          Animated.timing(notesOpacityAnim, {
-            toValue: 0,
-            duration: 100,
-            useNativeDriver: true,
-          }),
-        ]),
-        Animated.parallel([
-          Animated.timing(notesScaleAnim, {
-            toValue: 1,
-            duration: 100,
-            useNativeDriver: true,
-          }),
-          Animated.timing(notesOpacityAnim, {
-            toValue: 1,
-            duration: 100,
-            useNativeDriver: true,
-          }),
-        ]),
-      ]).start();
-    }
-    prevNotes.current = notes;
-  }, [notes, notesScaleAnim, notesOpacityAnim]);
 
   const isRelatedCell = useMemo(() => {
     if (!selectedCell) {
@@ -195,24 +149,13 @@ export function DefinedCell({
           {displayValue}
         </Animated.Text>
       ) : (
-        <Animated.View
-          className="h-full w-full flex-row flex-wrap p-0.5"
-          style={{
-            transform: [{ scale: notesScaleAnim }],
-            opacity: notesOpacityAnim,
-          }}
-        >
+        <Animated.View className="h-full w-full flex-row flex-wrap p-0.5">
           {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
-            <Text
+            <Note
               key={num}
-              className={`text-center-vertical h-1/3 w-1/3 text-center text-xs ${
-                notes.includes(num)
-                  ? 'text-blue-600'
-                  : 'text-transparent'
-              }`}
-            >
-              {notes.includes(num) ? num : ''}
-            </Text>
+              number={num}
+              isVisible={notes.includes(num)}
+            />
           ))}
         </Animated.View>
       )}

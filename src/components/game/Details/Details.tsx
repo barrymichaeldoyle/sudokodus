@@ -9,7 +9,7 @@ export function Details() {
   const { difficulty, rating } = gameState ?? {};
 
   return (
-    <View className="flex w-full flex-row items-center justify-around">
+    <View className="flex w-full flex-row items-center">
       <DetailItem
         label="Difficulty"
         value={
