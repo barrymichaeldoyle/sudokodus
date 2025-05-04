@@ -6,12 +6,14 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
     "scheme": "sudokodus",
     "jsEngine": "hermes",
     "web": {
       "bundler": "metro",
       "favicon": "./assets/favicon.png"
+    },
+    "experiments": {
+      "turboModules": true
     },
     "plugins": [
       "expo-router",
@@ -21,11 +23,7 @@
         "expo-build-properties",
         {
           "ios": {
-            "useFrameworks": "static",
-            "newArchEnabled": true
-          },
-          "android": {
-            "newArchEnabled": true
+            "useFrameworks": "static"
           }
         }
       ],
@@ -91,6 +89,7 @@
     "ios": {
       "supportsTablet": true,
       "jsEngine": "hermes",
+      "newArchEnabled": true,
       "bundleIdentifier": "com.barrymichaeldoyle.sudokodus",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
