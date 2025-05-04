@@ -22,7 +22,6 @@
   "dependencies": {
     "@expo/metro-runtime": "~5.0.4",
     "@expo/react-native-action-sheet": "^4.1.1",
-    "@react-native-async-storage/async-storage": "^2.1.2",
     "@react-native-community/netinfo": "11.4.1",
     "@supabase/auth-helpers-react": "^0.5.0",
     "@supabase/supabase-js": "2.49.4",
@@ -30,6 +29,7 @@
     "expo": "~53.0.7",
     "expo-application": "~6.1.4",
     "expo-build-properties": "~0.14.6",
+    "expo-checkbox": "~4.1.4",
     "expo-constants": "~17.1.5",
     "expo-crypto": "~14.1.4",
     "expo-device": "~7.1.4",
@@ -81,7 +81,9 @@
       "reactNativeDirectoryCheck": {
         "exclude": [
           "posthog-react-native-session-replay",
-          "expo-drizzle-studio-plugin"
+          "expo-drizzle-studio-plugin",
+          "@supabase/auth-helpers-react",
+          "expo-checkbox"
         ]
       }
     }

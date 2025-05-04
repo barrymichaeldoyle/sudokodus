@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-
-import { createZustandStorage } from './utils/createZustandStorage';
+import { createZustandStorage } from '../utils/createZustandStorage';
 
 interface SettingsState {
   isHapticFeedbackEnabled: boolean;

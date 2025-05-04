@@ -1,11 +1,11 @@
 import { ActionSheetProvider } from '@expo/react-native-action-sheet';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   QueryClient,
   QueryClientProvider,
 } from '@tanstack/react-query';
 import { Link, Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { SymbolView } from 'expo-symbols';
 import {
   getTrackingPermissionsAsync,
   PermissionStatus,
@@ -17,14 +17,19 @@ import { useEffect } from 'react';
 //   MaxAdContentRating,
 // } from 'react-native-google-mobile-ads';
 
-import { SymbolView } from 'expo-symbols';
 import '../global.css';
 import { primary, white } from '../src/colors';
 import { config } from '../src/config';
 import { DatabaseProvider } from '../src/db/DatabaseProvider';
 import { NetworkSyncManager } from '../src/NetworkSyncManager/NetworkSyncManager';
+import { createMMKVStorage } from '../src/utils/createMMKVStorage';
 
 const queryClient = new QueryClient();
+
+const POSTHOG_STORAGE_KEY = 'posthog-storage';
+const posthogStorage = createMMKVStorage(
+  POSTHOG_STORAGE_KEY
+);
 
 export default function RootLayout() {
   useEffect(() => {
@@ -61,7 +66,7 @@ export default function RootLayout() {
       apiKey={config.posthog.key}
       options={{
         host: config.posthog.host,
-        customStorage: AsyncStorage,
+        customStorage: posthogStorage,
       }}
     >
       <DatabaseProvider>

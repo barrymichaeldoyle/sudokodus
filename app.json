@@ -21,7 +21,11 @@
         "expo-build-properties",
         {
           "ios": {
-            "useFrameworks": "static"
+            "useFrameworks": "static",
+            "newArchEnabled": true
+          },
+          "android": {
+            "newArchEnabled": true
           }
         }
       ],
@@ -86,7 +90,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "jsEngine": "jsc",
+      "jsEngine": "hermes",
       "bundleIdentifier": "com.barrymichaeldoyle.sudokodus",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false

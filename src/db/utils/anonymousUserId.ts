@@ -1,12 +1,15 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Crypto from 'expo-crypto';
+import { MMKV } from 'react-native-mmkv';
+
 import { generateId } from './generateId';
 
 const ANONYMOUS_USER_KEY = 'sudokodus_anonymous_user_id';
+const STORAGE_KEY = 'anonymous-user-storage';
+const storage = new MMKV({ id: STORAGE_KEY });
 
-export async function getAnonymousUserId(): Promise<string> {
+export function getAnonymousUserId(): string {
   try {
-    const existingId = await AsyncStorage.getItem(
+    const existingId = storage.getString(
       ANONYMOUS_USER_KEY
     );
     if (existingId) {
@@ -15,7 +18,7 @@ export async function getAnonymousUserId(): Promise<string> {
 
     // Generate a new UUID if none exists
     const newId = generateId();
-    await AsyncStorage.setItem(ANONYMOUS_USER_KEY, newId);
+    storage.set(ANONYMOUS_USER_KEY, newId);
     return newId;
   } catch (error) {
     console.error(
@@ -27,9 +30,9 @@ export async function getAnonymousUserId(): Promise<string> {
   }
 }
 
-export async function clearAnonymousUserId(): Promise<void> {
+export function clearAnonymousUserId(): void {
   try {
-    await AsyncStorage.removeItem(ANONYMOUS_USER_KEY);
+    storage.delete(ANONYMOUS_USER_KEY);
   } catch (error) {
     console.error(
       'Error clearing anonymous user ID:',

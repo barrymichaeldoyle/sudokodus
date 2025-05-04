@@ -1,10 +1,9 @@
 import { MMKV } from 'react-native-mmkv';
-import { createJSONStorage } from 'zustand/middleware';
 
-export function createZustandStorage(storageKey: string) {
+export function createMMKVStorage(storageKey: string) {
   const storage = new MMKV({ id: storageKey });
 
-  return createJSONStorage(() => ({
+  return {
     getItem: (name: string) => {
       const value = storage.getString(name);
       return value ?? null;
@@ -15,5 +14,5 @@ export function createZustandStorage(storageKey: string) {
     removeItem: (name: string) => {
       storage.delete(name);
     },
-  }));
+  };
 }
