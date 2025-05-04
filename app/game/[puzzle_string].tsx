@@ -22,7 +22,11 @@ export default function GameScreen() {
          * might need a more robust solution for
          * different screen sizes
          **/}
-        <View className="h-[82px] w-full bg-primary-500" />
+        {/* <BannerAd
+          unitId={TestIds.BANNER}
+          size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+        /> */}
+        {/* <View className="h-[82px] w-full bg-primary-500" /> */}
       </View>
     </ScreenContainer>
   );
