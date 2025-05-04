@@ -37,7 +37,7 @@ export function NumberButton({ num }: NumberButtonProps) {
     <View className="flex-1 p-1">
       <TouchableOpacity
         disabled={!selectedCell}
-        onPress={handlePress}
+        onPressIn={handlePress}
         onLayout={handleLayout}
         className="aspect-square items-center justify-center rounded-full border-2 border-primary-500 bg-white active:bg-primary-100"
       >

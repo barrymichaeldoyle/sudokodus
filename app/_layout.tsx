@@ -4,7 +4,7 @@ import {
   QueryClient,
   QueryClientProvider,
 } from '@tanstack/react-query';
-import { Stack } from 'expo-router';
+import { Link, Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import {
   getTrackingPermissionsAsync,
@@ -17,6 +17,7 @@ import { useEffect } from 'react';
 //   MaxAdContentRating,
 // } from 'react-native-google-mobile-ads';
 
+import { SymbolView } from 'expo-symbols';
 import '../global.css';
 import { primary, white } from '../src/colors';
 import { config } from '../src/config';
@@ -82,6 +83,26 @@ export default function RootLayout() {
                     },
                     headerTintColor: white,
                     animation: 'slide_from_bottom',
+                    headerRight: () => (
+                      <Link href="/settings">
+                        <SymbolView
+                          name="gearshape.fill"
+                          size={24}
+                          tintColor={white}
+                        />
+                      </Link>
+                    ),
+                  }}
+                />
+                <Stack.Screen
+                  name="settings"
+                  options={{
+                    title: 'Settings',
+                    headerBackTitle: 'Back',
+                    headerStyle: {
+                      backgroundColor: primary['500'],
+                    },
+                    headerTintColor: white,
                   }}
                 />
                 <Stack.Screen name="+not-found" />

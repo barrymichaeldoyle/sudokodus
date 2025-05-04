@@ -7,6 +7,7 @@
     "start": "expo start --localhost",
     "android": "expo run:android",
     "ios": "expo start --ios --localhost",
+    "ios:tunnel": "expo start --ios --tunnel",
     "web": "expo start --web",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
