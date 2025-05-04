@@ -1,3 +1,4 @@
+import { parseCurrentGameState } from '../../../../hooks/useGameStates';
 import { useCurrentGameStateQuery } from '../../hooks/useCurrentGameStateQuery';
 import { DefinedCell } from './DefinedCell';
 import { EmptyCell } from './EmptyCell';
@@ -16,10 +17,7 @@ export function Cell({ row, col }: CellProps) {
     return <EmptyCell />;
   }
 
-  const currentState =
-    typeof gameState.current_state === 'string'
-      ? JSON.parse(gameState.current_state)
-      : gameState.current_state;
+  const currentState = parseCurrentGameState(gameState);
 
   const cell = (currentState as unknown as CellData[])[
     cellIndex

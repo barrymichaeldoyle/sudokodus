@@ -352,10 +352,7 @@ export function useUpdateCell() {
         throw new Error('Game state not found');
       }
 
-      const currentState =
-        typeof gameState.current_state === 'string'
-          ? JSON.parse(gameState.current_state)
-          : gameState.current_state;
+      const currentState = parseCurrentGameState(gameState);
 
       const cellIndex = row * 9 + col;
       const cell = currentState[cellIndex];
@@ -397,4 +394,12 @@ export function useUpdateCell() {
       });
     },
   });
+}
+
+export function parseCurrentGameState(
+  gameState: LocalGameState
+) {
+  return typeof gameState.current_state === 'string'
+    ? JSON.parse(gameState.current_state)
+    : gameState.current_state;
 }

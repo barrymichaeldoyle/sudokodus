@@ -18,9 +18,6 @@ export function NumberButton({ num }: NumberButtonProps) {
   const selectedCell = useGameStore(
     state => state.selectedCell
   );
-  const isNotesMode = useGameStore(
-    state => state.isNotesMode
-  );
 
   const [size, setSize] = useState(24);
 
@@ -33,7 +30,7 @@ export function NumberButton({ num }: NumberButtonProps) {
   }
 
   function handlePress() {
-    handleUpdate(num, isNotesMode);
+    handleUpdate(num);
   }
 
   return (
