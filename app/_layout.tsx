@@ -12,6 +12,7 @@ import {
   PermissionStatus,
   requestTrackingPermissionsAsync,
 } from 'expo-tracking-transparency';
+import { verifyInstallation } from 'nativewind';
 import { PostHogProvider } from 'posthog-react-native';
 import { useEffect } from 'react';
 import mobileAds, {
@@ -33,6 +34,8 @@ const posthogStorage = createMMKVStorage(
 );
 
 export default function RootLayout() {
+  verifyInstallation();
+
   useEffect(() => {
     async function initializeServices() {
       const { status } =

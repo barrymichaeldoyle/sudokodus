@@ -3,6 +3,7 @@ import { SymbolView } from 'expo-symbols';
 import { Text, View } from 'react-native';
 
 import { primary } from '../../src/colors';
+import { ContinueGameButton } from '../../src/components/ContinueGameButton';
 import { NewGameButton } from '../../src/components/NewGameButton';
 import { ScreenContainer } from '../../src/components/ScreenContainer';
 
@@ -28,6 +29,7 @@ export default function HomeScreen() {
           </View>
         </View>
         <View className="flex flex-col gap-4">
+          <ContinueGameButton />
           <NewGameButton />
         </View>
       </View>

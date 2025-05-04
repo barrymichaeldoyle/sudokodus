@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 
 import { primary } from '../../../../colors';
+import { useHapticFeedback } from '../../../../hooks/useHapticFeedback';
 import { useCurrentGameStateQuery } from '../../hooks/useCurrentGameStateQuery';
 
 interface ActionButtonProps {
@@ -25,6 +26,7 @@ export function ActionButton({
 }: ActionButtonProps) {
   const { isLoading } = useCurrentGameStateQuery();
   const [iconSize, setIconSize] = useState(24);
+  const { selectionAsync } = useHapticFeedback();
 
   function handleLayout(e: LayoutChangeEvent) {
     const size = Math.min(
@@ -34,11 +36,16 @@ export function ActionButton({
     setIconSize(size * 0.5);
   }
 
+  function handlePress() {
+    selectionAsync();
+    onPress();
+  }
+
   return (
     <View className="flex-1 p-2">
       <TouchableOpacity
         disabled={isLoading}
-        onPressIn={onPress}
+        onPressIn={handlePress}
         onLayout={handleLayout}
         className="aspect-square items-center justify-center rounded-md border-2 border-primary-500 bg-white active:bg-primary-100"
       >

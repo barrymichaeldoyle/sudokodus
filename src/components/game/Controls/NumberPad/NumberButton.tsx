@@ -6,6 +6,7 @@ import {
   View,
 } from 'react-native';
 
+import { useHapticFeedback } from '../../../../hooks/useHapticFeedback';
 import { useGameStore } from '../../store';
 import { useHandleUpdateCell } from '../hooks/useHandleUpdateCell';
 
@@ -15,6 +16,7 @@ interface NumberButtonProps {
 
 export function NumberButton({ num }: NumberButtonProps) {
   const handleUpdate = useHandleUpdateCell();
+  const { selectionAsync } = useHapticFeedback();
   const selectedCell = useGameStore(
     state => state.selectedCell
   );
@@ -30,6 +32,7 @@ export function NumberButton({ num }: NumberButtonProps) {
   }
 
   function handlePress() {
+    selectionAsync();
     handleUpdate(num);
   }
 
