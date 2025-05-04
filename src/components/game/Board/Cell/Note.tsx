@@ -8,8 +8,12 @@ interface NoteProps {
 }
 
 export function Note({ number, isVisible }: NoteProps) {
-  const scaleAnim = useRef(new Animated.Value(0)).current;
-  const opacityAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(
+    new Animated.Value(isVisible ? 1 : 0)
+  ).current;
+  const opacityAnim = useRef(
+    new Animated.Value(isVisible ? 1 : 0)
+  ).current;
   const prevIsVisible = useRef(isVisible);
 
   useEffect(() => {
