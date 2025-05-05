@@ -11,7 +11,7 @@ import { PostHogProvider } from 'posthog-react-native';
 
 import '../global.css';
 import { primary, white } from '../src/colors';
-import { SettingsLink } from '../src/components/SettingsLink';
+import { SettingsLink } from '../src/components/settings/SettingsLink';
 import { config } from '../src/config';
 import { DatabaseProvider } from '../src/db/DatabaseProvider';
 import { useSetupAdMob } from '../src/hooks/useSetupAdMob/useSetupAdMob';

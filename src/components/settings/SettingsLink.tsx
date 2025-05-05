@@ -1,7 +1,7 @@
 import { Link } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 
-import { white } from '../colors';
+import { white } from '../../colors';
 
 export function SettingsLink() {
   return (

@@ -2,7 +2,7 @@ import { Tabs } from 'expo-router';
 import { Platform } from 'react-native';
 
 import { primary, white } from '../../src/colors';
-import { SettingsLink } from '../../src/components/SettingsLink';
+import { SettingsLink } from '../../src/components/settings/SettingsLink';
 import { renderTabIcon } from '../../src/components/ui/TabIcon';
 
 export default function TabLayout() {

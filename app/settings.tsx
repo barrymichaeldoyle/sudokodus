@@ -1,7 +1,7 @@
-import { Switch, Text, View } from 'react-native';
+import { View } from 'react-native';
 
-import { primary } from '../src/colors';
 import { ScreenContainer } from '../src/components/ScreenContainer';
+import { SettingsItem } from '../src/components/settings/SettingsItem';
 import { useSettingsStore } from '../src/stores/settings';
 
 export default function SettingsScreen() {
@@ -15,17 +15,13 @@ export default function SettingsScreen() {
   return (
     <ScreenContainer>
       <View className="p-4">
-        <View className="flex-row items-center justify-between border-b border-gray-300 bg-white p-3">
-          <Text className="text-base text-black">
-            Vibration
-          </Text>
-          <Switch
+        <View className="flex flex-col rounded-xl bg-white">
+          <SettingsItem
             value={isHapticFeedbackEnabled}
             onValueChange={setIsHapticFeedbackEnabled}
-            trackColor={{
-              true: primary[500],
-              false: primary[200],
-            }}
+            title="Vibration"
+            iosIconName="hand.tap"
+            isLastItem
           />
         </View>
       </View>
