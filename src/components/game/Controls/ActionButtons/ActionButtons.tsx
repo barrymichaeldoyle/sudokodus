@@ -23,25 +23,25 @@ export function ActionButtons() {
         <ActionButton
           icon="arrow.uturn.left"
           label="Undo"
-          onPress={() => console.log('undo')}
+          onPressIn={() => console.log('undo')}
         />
         <ActionButton
           icon="eraser"
           label="Erase"
-          onPress={handleErasePress}
+          onPressIn={handleErasePress}
         />
       </View>
       <View className="flex-1 flex-row">
         <ActionButton
           icon="questionmark.circle"
           label="Hint"
-          onPress={() => console.log('hint')}
+          onPressIn={() => console.log('hint')}
         />
         <ActionButton
           badge={isNotesMode ? 'on' : 'off'}
           icon="pencil"
           label="Notes"
-          onPress={toggleNotesMode}
+          onPressIn={toggleNotesMode}
         />
       </View>
     </View>

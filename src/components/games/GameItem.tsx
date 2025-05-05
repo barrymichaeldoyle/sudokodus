@@ -51,6 +51,7 @@ export function GameItem({ game }: GameItemProps) {
   return (
     <TouchableOpacity
       className="group flex flex-row items-center justify-between overflow-hidden rounded-l-md rounded-r-2xl bg-white shadow-lg shadow-black/5 active:bg-gray-50"
+      activeOpacity={0.5}
       onPress={() =>
         router.push(`/game/${game.puzzle_string || ''}`)
       }

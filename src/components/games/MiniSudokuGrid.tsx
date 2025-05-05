@@ -47,7 +47,6 @@ export function MiniSudokuGrid({
                             key={cellCol}
                             className="relative h-full flex-1 items-center justify-center"
                           >
-                            {/* Cell borders */}
                             <View
                               className={`absolute inset-0 border-gray-100 ${
                                 !isLastInBlock

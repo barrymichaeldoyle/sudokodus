@@ -1,12 +1,12 @@
 import {
   ActivityIndicator,
-  Pressable,
-  PressableProps,
   Text,
+  TouchableOpacity,
+  TouchableOpacityProps,
 } from 'react-native';
 import { twMerge } from 'tailwind-merge';
 
-interface ButtonProps extends PressableProps {
+interface ButtonProps extends TouchableOpacityProps {
   variant?: 'primary' | 'secondary';
   label: string;
   isLoading?: boolean;
@@ -21,7 +21,7 @@ export function Button({
   ...props
 }: ButtonProps) {
   return (
-    <Pressable
+    <TouchableOpacity
       disabled={disabled || isLoading}
       className={twMerge(
         'h-16 w-full items-center justify-center rounded-2xl shadow-lg shadow-black/10',
@@ -31,6 +31,7 @@ export function Button({
         }[variant],
         className
       )}
+      activeOpacity={0.8}
       {...props}
     >
       <Text
@@ -48,6 +49,6 @@ export function Button({
           label
         )}
       </Text>
-    </Pressable>
+    </TouchableOpacity>
   );
 }

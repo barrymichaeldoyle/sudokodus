@@ -2,6 +2,7 @@ import { Tabs } from 'expo-router';
 import { Platform } from 'react-native';
 
 import { primary, white } from '../../src/colors';
+import { SettingsLink } from '../../src/components/SettingsLink';
 import { renderTabIcon } from '../../src/components/ui/TabIcon';
 
 export default function TabLayout() {
@@ -17,6 +18,10 @@ export default function TabLayout() {
         headerStyle: { backgroundColor: primary['500'] },
         headerTintColor: white,
         sceneStyle: { backgroundColor: 'transparent' },
+        headerRight: SettingsLink,
+        headerRightContainerStyle: {
+          paddingInlineEnd: 10,
+        },
       }}
     >
       <Tabs.Screen

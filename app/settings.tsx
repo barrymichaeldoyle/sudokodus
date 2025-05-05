@@ -1,6 +1,6 @@
-import Checkbox from 'expo-checkbox';
-import { Text, View } from 'react-native';
+import { Switch, Text, View } from 'react-native';
 
+import { primary } from '../src/colors';
 import { ScreenContainer } from '../src/components/ScreenContainer';
 import { useSettingsStore } from '../src/stores/settings';
 
@@ -15,18 +15,17 @@ export default function SettingsScreen() {
   return (
     <ScreenContainer>
       <View className="p-4">
-        <View className="flex-row items-center justify-between border-b border-gray-300 py-3">
+        <View className="flex-row items-center justify-between border-b border-gray-300 bg-white p-3">
           <Text className="text-base text-black">
-            Haptic Feedback
+            Vibration
           </Text>
-          <Checkbox
+          <Switch
             value={isHapticFeedbackEnabled}
             onValueChange={setIsHapticFeedbackEnabled}
-            color={
-              isHapticFeedbackEnabled
-                ? '#81b0ff'
-                : undefined
-            }
+            trackColor={{
+              true: primary[500],
+              false: primary[200],
+            }}
           />
         </View>
       </View>

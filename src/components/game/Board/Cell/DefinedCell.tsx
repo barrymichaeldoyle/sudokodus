@@ -4,7 +4,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import { Animated, TouchableOpacity } from 'react-native';
+import { Animated, Easing, Pressable } from 'react-native';
 import { twMerge } from 'tailwind-merge';
 
 import { useGameStore } from '../../store';
@@ -63,17 +63,19 @@ export function DefinedCell({
       } else {
         setShowText(true);
         setDisplayValue(value);
-        // Bounce in animation
+        // Enhanced bounce in animation
         Animated.parallel([
           Animated.sequence([
             Animated.timing(scaleAnim, {
               toValue: 1.2,
               duration: 100,
+              easing: Easing.out(Easing.back(1.5)),
               useNativeDriver: true,
             }),
             Animated.timing(scaleAnim, {
               toValue: 1,
               duration: 100,
+              easing: Easing.out(Easing.back(1.5)),
               useNativeDriver: true,
             }),
           ]),
@@ -126,13 +128,13 @@ export function DefinedCell({
   }, [selectedCell, row, col, isRelatedCell]);
 
   return (
-    <TouchableOpacity
+    <Pressable
       className={twMerge(
         'items-center justify-center',
         bgColorClass
       )}
       style={{ width: cellSize, height: cellSize }}
-      onPress={() => setSelectedCell(row, col)}
+      onPressIn={() => setSelectedCell(row, col)}
     >
       {showText ? (
         <Animated.Text
@@ -159,6 +161,6 @@ export function DefinedCell({
           ))}
         </Animated.View>
       )}
-    </TouchableOpacity>
+    </Pressable>
   );
 }

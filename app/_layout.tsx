@@ -4,14 +4,14 @@ import {
   QueryClientProvider,
 } from '@tanstack/react-query';
 import 'expo-dev-client';
-import { Link, Stack } from 'expo-router';
+import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { SymbolView } from 'expo-symbols';
 import { verifyInstallation } from 'nativewind';
 import { PostHogProvider } from 'posthog-react-native';
 
 import '../global.css';
 import { primary, white } from '../src/colors';
+import { SettingsLink } from '../src/components/SettingsLink';
 import { config } from '../src/config';
 import { DatabaseProvider } from '../src/db/DatabaseProvider';
 import { useSetupAdMob } from '../src/hooks/useSetupAdMob/useSetupAdMob';
@@ -57,15 +57,7 @@ export default function RootLayout() {
                     headerTintColor: white,
                     headerShadowVisible: false,
                     animation: 'slide_from_bottom',
-                    headerRight: () => (
-                      <Link href="/settings">
-                        <SymbolView
-                          name="gearshape.fill"
-                          size={24}
-                          tintColor={white}
-                        />
-                      </Link>
-                    ),
+                    headerRight: SettingsLink,
                   }}
                 />
                 <Stack.Screen

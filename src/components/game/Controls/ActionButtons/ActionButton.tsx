@@ -15,14 +15,14 @@ interface ActionButtonProps {
   badge?: string;
   icon: SFSymbol;
   label: string;
-  onPress: () => void;
+  onPressIn: () => void;
 }
 
 export function ActionButton({
   badge,
   icon,
   label,
-  onPress,
+  onPressIn,
 }: ActionButtonProps) {
   const { isLoading } = useCurrentGameStateQuery();
   const [iconSize, setIconSize] = useState(24);
@@ -38,7 +38,7 @@ export function ActionButton({
 
   function handlePress() {
     selectionAsync();
-    onPress();
+    onPressIn();
   }
 
   return (
