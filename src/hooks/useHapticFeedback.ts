@@ -4,7 +4,7 @@ import {
   selectionAsync,
 } from 'expo-haptics';
 
-import { useSettingsStore } from '../stores/settings';
+import { useSettingsStore } from '../screens/Settings/store';
 
 /**
  * Hook for haptic feedback (looks at settings store for isHapticFeedbackEnabled)
