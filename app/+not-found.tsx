@@ -2,13 +2,14 @@ import { Link, Stack } from 'expo-router';
 import { Text, View } from 'react-native';
 import { primary, white } from '../src/colors';
 import { ScreenContainer } from '../src/components/ScreenContainer';
+import { GAME_TITLE } from '../src/constants';
 
 export default function NotFoundScreen() {
   return (
     <ScreenContainer>
       <Stack.Screen
         options={{
-          title: 'SUDOKODUS',
+          title: GAME_TITLE,
           headerBackTitle: 'Back',
           headerStyle: {
             backgroundColor: primary['500'],

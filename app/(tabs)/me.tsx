@@ -1,12 +1,5 @@
-import { Text, View } from 'react-native';
-import { ScreenContainer } from '../../src/components/ScreenContainer';
+import MeScreen from '../../src/screens/Me/Me';
 
-export default function MeScreen() {
-  return (
-    <ScreenContainer>
-      <View className="flex flex-1 items-center justify-center">
-        <Text>Account Settings Coming Soon!</Text>
-      </View>
-    </ScreenContainer>
-  );
+export default function Me() {
+  return <MeScreen />;
 }

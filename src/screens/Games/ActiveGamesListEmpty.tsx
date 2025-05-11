@@ -1,6 +1,5 @@
 import { Text, View } from 'react-native';
-
-import { NewGameButton } from '../NewGameButton';
+import { NewGameButton } from '../../components/NewGameButton';
 
 export function ActiveGamesListEmpty() {
   return (

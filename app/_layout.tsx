@@ -11,8 +11,9 @@ import { PostHogProvider } from 'posthog-react-native';
 
 import '../global.css';
 import { primary, white } from '../src/colors';
-import { SettingsLink } from '../src/components/settings/SettingsLink';
+import { SettingsLink } from '../src/components/SettingsLink';
 import { config } from '../src/config';
+import { GAME_TITLE } from '../src/constants';
 import { DatabaseProvider } from '../src/db/DatabaseProvider';
 import { useSetupAdMob } from '../src/hooks/useSetupAdMob/useSetupAdMob';
 import { NetworkSyncManager } from '../src/NetworkSyncManager/NetworkSyncManager';
@@ -49,7 +50,7 @@ export default function RootLayout() {
                 <Stack.Screen
                   name="game/[puzzle_string]"
                   options={{
-                    title: 'SUDOKODUS',
+                    title: GAME_TITLE,
                     headerBackTitle: 'Back',
                     headerStyle: {
                       backgroundColor: primary['500'],

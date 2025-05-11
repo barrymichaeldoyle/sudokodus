@@ -7,11 +7,11 @@ import {
 } from 'react-native';
 
 import { SymbolView } from 'expo-symbols';
-import { DIFFICULTY_LABELS_MAP } from '../../db/types';
+import { DIFFICULTY_LABELS_MAP } from '../../../db/types';
 import {
   LocalGameStateWithPuzzle,
   useDeleteGame,
-} from '../../hooks/useGameStates';
+} from '../../../hooks/useGameStates';
 import { MiniSudokuGrid } from './MiniSudokuGrid';
 
 interface GameItemProps {

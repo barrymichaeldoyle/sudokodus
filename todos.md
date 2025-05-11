@@ -6,6 +6,7 @@ A list of things that need to be done sometime relatively soon or later.
 
 These are the requirements in order to release v1.
 
+- Implement Continue Game Button
 - Implement Undo Functionality
 - Implement Hints System
 - Implement Game Completed Screen

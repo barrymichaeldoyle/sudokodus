@@ -1,7 +1,7 @@
 import { View } from 'react-native';
 
 import { ScreenContainer } from '../../components/ScreenContainer';
-import { SettingsItem } from '../../components/settings/SettingsItem';
+import { SettingsItem } from './SettingsItem';
 import { useSettingsStore } from './store';
 
 export default function SettingsScreen() {
